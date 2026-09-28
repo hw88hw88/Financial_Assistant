@@ -23,8 +23,8 @@ class TestGA(unittest.TestCase):
             num_of_generations=2,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
         )
         self.assertIsNotNone(the_ga.fin_start)
         self.assertIsNotNone(the_ga.fin_end)
@@ -47,8 +47,8 @@ class TestGA(unittest.TestCase):
             num_of_generations=2,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
         )
         the_ga.initialise_logs()
         self.assertTrue(os.path.exists(the_ga.hyper_parameter_filename))
@@ -70,8 +70,8 @@ class TestGA(unittest.TestCase):
             num_of_generations=2,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
         )
 
         the_ga.run_ga()
@@ -98,8 +98,8 @@ class TestGA(unittest.TestCase):
             num_of_generations=num_of_generations,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
             num_of_elite = num_of_elite,
         )
         the_ga.initialise_logs()
@@ -141,8 +141,8 @@ class TestGA(unittest.TestCase):
             num_of_generations=2,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
         )
 
         the_ga.run_ga()
@@ -172,8 +172,8 @@ class TestGA(unittest.TestCase):
             num_of_generations=2,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
         )
 
         # run initialise_log()
@@ -197,8 +197,8 @@ class TestGA(unittest.TestCase):
             num_of_generations=2,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
         )
 
         the_ga.close_ga_performance_file()
@@ -219,8 +219,8 @@ class TestGA(unittest.TestCase):
             num_of_generations=2,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
             is_import_previous_strategy=True,
         )
 

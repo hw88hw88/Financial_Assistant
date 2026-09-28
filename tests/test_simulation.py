@@ -10,7 +10,7 @@ class TestSimulation(unittest.TestCase):
     def test_class_functions(self):
         self.assertIsNotNone(simulation.Simulation)
 
-        sim=simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim=simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         self.assertIsNotNone(sim.api)
         self.assertIsNotNone(sim.calculate_fin_indicator_for_stock)
         self.assertIsNotNone(sim.sorting_stocks)
@@ -24,7 +24,7 @@ class TestSimulation(unittest.TestCase):
     # testing "calculate_fin_indicator_for_stock()"
     # testing "sorting_stocks()"
     def test_function_returns(self):
-        sim=simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim=simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         st=strategy.Strategy(start_up_cash=100000)
 
         # testing "calculate_fin_indicator_for_stock()"
@@ -45,7 +45,7 @@ class TestSimulation(unittest.TestCase):
     # testing "calculate_fin_indicator_for_stock()"
     # testing "sorting_stocks()"
     def test_function_return_type(self):
-        sim=simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim=simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         st=strategy.Strategy(start_up_cash=100000)
 
         # testing "calculate_fin_indicator_for_stock()"
@@ -65,8 +65,8 @@ class TestSimulation(unittest.TestCase):
     # testing "calculate_fin_indicator_for_stock()"
     # testing "sorting_stocks()"
     def test_function_return_value(self):
-        fin_start='2020-01-01'
-        fin_end='2020-01-31'
+        fin_start='2023-01-01'
+        fin_end='2023-01-31'
         sim=simulation.Simulation(fin_start=fin_start, fin_end=fin_end, trading_fee=0.01)
         st=strategy.Strategy(start_up_cash=100000)
 
@@ -106,7 +106,7 @@ class TestSimulation(unittest.TestCase):
 
     # test run_strategy()
     def test_run_strategy(self):
-        sim = simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim = simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         start_up_cash =100000
         st = strategy.Strategy(start_up_cash=start_up_cash)
 
@@ -116,7 +116,7 @@ class TestSimulation(unittest.TestCase):
 
     # test eval_population()
     def test_eval_population(self):
-        sim = simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim = simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         pop = population.Population(start_up_cash=100000, pop_size=1)
         sim.eval_population(pop)
 
@@ -126,7 +126,7 @@ class TestSimulation(unittest.TestCase):
 
     # test get_stock_fin_indicator()
     def test_get_stock_fin_indicator(self):
-        sim = simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim = simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         start_up_cash =100000
         st = strategy.Strategy(start_up_cash=start_up_cash)
         df = sim.get_stock_fin_indicator(
@@ -137,8 +137,8 @@ class TestSimulation(unittest.TestCase):
 
     # test find_first_last_trading_date()
     def test_find_first_last_trading_date(self):
-        fin_start='2020-01-01'
-        fin_end='2020-01-31'
+        fin_start='2023-01-01'
+        fin_end='2023-01-31'
         sim=simulation.Simulation(fin_start=fin_start, fin_end=fin_end, trading_fee=0.01)
         st=strategy.Strategy(start_up_cash=100000)
         df_score=sim.calculate_fin_indicator_for_stock(st=st, symbol='MSFT')
@@ -157,8 +157,8 @@ class TestSimulation(unittest.TestCase):
 
     # test find_nth_date_from_stocks()
     def test_find_nth_date_from_stocks(self):
-        fin_start='2020-01-01'
-        fin_end='2020-01-31'
+        fin_start='2023-01-01'
+        fin_end='2023-01-31'
         sim=simulation.Simulation(fin_start=fin_start, fin_end=fin_end, trading_fee=0.01)
         st=strategy.Strategy(start_up_cash=100000)
         df_score=sim.calculate_fin_indicator_for_stock(st=st, symbol='MSFT')

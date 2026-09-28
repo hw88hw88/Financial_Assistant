@@ -5,6 +5,17 @@ import numpy as np
 
 # a classs to perform validation
 class Validation:
+    # input:
+    # 1. val_fin_start: the start date of a financial period for validation
+    # 2. val_fin_end: the end date of a financial period for validation
+    # 3. run_id: the run id
+    # 4. trading_fee: trading fee
+    # 5. start_up_cash: start up capital
+    # 6. gene_spec_filename: file path for gene specification
+    # 7. elite_json_filepath: file path to store elite
+    # 8. elite_csv_filepath: file path to store DNA
+    # 9. validation_hyper_parameter_filename: to store the validation parameters
+    # 10. is_testing: boolean (testing or validation)
     def __init__(
         self,
 
@@ -67,7 +78,11 @@ class Validation:
     # or the following:
     # 2. gene file, and
     # 3. gene spec file
-    def import_strategy(self, st_generation, st_num):
+    def import_strategy(
+            self, 
+            st_generation, 
+            st_num
+        ):
         fm = file_mgt.FileMgt()
 
         # initialise variables
@@ -127,8 +142,10 @@ class Validation:
 
     # run the simulation for validation
     # input parameters:
-    # 1. st_generation: an integer indicator the generation in the training process. For example, 0 means the 1st generation
-    # 2. st_num: an integer indicator the number of the fittest in the generation. For example, 0 means the fittest investment strategy
+    # 1. st_generation: an integer indicator the generation in the training process. 
+    #    For example, 0 means the 1st generation
+    # 2. st_num: an integer indicator the number of the fittest in the generation. 
+    #    For example, 0 means the fittest investment strategy
     # 3. validation_performance_filename:  a string of file name to store the performance record
     # output: no returned value
     # requirements to run: 

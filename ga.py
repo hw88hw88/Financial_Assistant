@@ -96,6 +96,25 @@ class GA:
     Yee-King, M., (no date) CM3020 Artificial Intelligence, Week 10 Mid-term coursework starter code [online] Available from: https://www.coursera.org/learn/uol-cm3020-artificial-intelligence/assignment-submission/6JASg/mid-term-coursework [8 December 2025]
     '''
     # initialise the parameters of the GA, and their default values
+    # input:
+    # 1. pool size: the number of threads
+    # 2. start_up_cash: the start up capital
+    # 3. trading_fee: trading fee
+    # 4. fin_start: the start date of the financial period
+    # 5. fin_end: the end date of the financial period
+    # 6. run_id: run id for the running round
+    # 7. pop_size: the population size
+    # 8. num_of_generations: total number of generations
+    # 9. point_mutate_rate: the chance to trigger point mutation
+    # 10. point_mutate_amt: the amount to mutate
+    # 11. gene_spec_filename: gene specification file path
+    # 12. ga_performance_filename: file path to store ga performance
+    # 13. hyper_parameter_filename: file path to store hyper-parameters
+    # 14. run_id_filename: file path to store run id
+    # 15. elite_json_filepath: file path to store gdict and performance of the elite
+    # 16. elite_csv_filepath: file path to store DNA
+    # 17. num_of_elite: number of elites to be selected in each generation
+    # 18. is_import_previous_strategy: boolean, true to select elite in previous run
     def __init__(
         self,
         pool_size,
@@ -120,7 +139,7 @@ class GA:
         elite_json_filepath = 'JSON/unittest_fittest',
         elite_csv_filepath = 'CSV/unittest_fittest',
         
-        num_of_elite = 3,
+        num_of_elite = 1,
 
         is_import_previous_strategy = False,
     ):
@@ -310,11 +329,17 @@ class GA:
     # input:
     # 1. generation: number of generations. 1 stands for the first generation
     # 2. top_n_strategies: a list of the <self.num_of_elite> fittest strategies. This is the output of elitism()
+    # 3. the list of rewards of all strategies in a generation
     # output: no returned value
     # change:
     # 1. add performance metrics to <ga_performance_file_content> JSON
     # 2. print the metrics and performance
-    def metrics(self, generation, top_n_strategies, all_rewards):
+    def metrics(
+            self, 
+            generation, 
+            top_n_strategies, 
+            all_rewards
+        ):
         # prepare the information to be logged to file
         log = {
             "generation": str(generation),
@@ -436,7 +461,11 @@ class GA:
     # change:
     # 1. JSON file(s) storing gdict of the <self.num_of_elite> fittest
     # 2. CSV file(s) storing the genome of the <self.num_of_elite> fittest
-    def elitism(self, pop, generation):
+    def elitism(
+            self, 
+            pop, 
+            generation
+        ):
         # the performance of strategies in current generation
         all_rewards = [st.rewards for st in pop.strategies]
 
@@ -476,12 +505,14 @@ class GA:
 
     # check any available previous elite strategy
     # ask for importing the previous elite, if found
-    # input: (no input parameter)
+    # input:
+    # 1. run_id_filename: file path of file of run id
     # output:
     # 1. st: the elite strategy
     def import_elite_from_previous_run(
             self, 
-            run_id_filename = 'CSV/run_id.csv'):
+            run_id_filename = 'CSV/run_id.csv'
+        ):
         # check for any old elite
         if not self.fm.check_file_exist(run_id_filename):
             return None
@@ -525,7 +556,7 @@ class GA:
         st, gdict = Chatbot.get_strategy(
             run_id=import_run_id.strip()
         )
-        if st is not None:
+        if st:
             print('The elite from: ', import_run_id.strip(), ' was imported.\n')
             return st
         print('No elite strategy is imported.\n')
@@ -634,6 +665,7 @@ class GA:
         ## the initialisation process that the developer does not want it to run when creating the ga instances, but run at the start of ga process
         self.initialise_logs()
 
+        # import previous strategy
         if self.is_import_previous_strategy:
             imported_st = self.import_elite_from_previous_run(
                 run_id_filename = self.run_id_filename

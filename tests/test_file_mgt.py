@@ -31,7 +31,9 @@ class TestFileMgt(unittest.TestCase):
         fm.write_to_json(to_json_content=content, filename=filepath)
 
         # list and check the number of JSON file(s) is 1
-        files = fm.list_files_in_directory('JSON')
+        files = fm.list_files_in_directory('JSON/test')
+        files = fm.list_files_in_directory('JSON/test')
+        self.assertEqual(len(files), 1)
         read_file_content = fm.read_json(filename=filepath)
         self.assertEqual(read_file_content, content)
 

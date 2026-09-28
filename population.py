@@ -28,8 +28,15 @@ class Population:
     Yee-King, M., (no date) CM3020 Artificial Intelligence, Week 10 Mid-term coursework starter code [online] Available from: https://www.coursera.org/learn/uol-cm3020-artificial-intelligence/assignment-submission/6JASg/mid-term-coursework [8 December 2025]
     '''
     # input:
-    ## 1. pop size
-    def __init__(self, start_up_cash, pop_size=10, st=None):
+    # 1. start_up_cash: start up capital
+    # 2. pop size: population size
+    # 3. st: strategy instance (optional)
+    def __init__(
+            self, 
+            start_up_cash, 
+            pop_size=10, 
+            st=None
+        ):
         if st is not None:
             self.strategies = [strategy.Strategy(start_up_cash) for i in range(pop_size - 1)]
             self.strategies.append(st)

@@ -1,3 +1,4 @@
+# import libraries
 import os
 import pickle
 import time
@@ -7,23 +8,41 @@ import yfinance as yf
 import pandas as pd
 
 class APIFinData:
-    def __init__(self):
+    # initialize the instance
+    # input:
+    # 1. stock_symbol_file: the file path of the file storing the stock symbols
+    # 2. stock_symbol_downloadable_filename: the file path of the file storing downloadable symbols
+    # 3. stock_symbol_undownloadable_filename: the file path of the file storing undownloadable symbols
+    # 4. symbol_last_update_filename: the file path of the file storing the symbol last update
+    def __init__(
+            self,
+            stock_symbol_file = 'CSV/S&P 500 Historical Components & Changes (Updated).csv',
+            stock_symbol_downloadable_filename = 'CSV/downloadable_stock_code.csv',
+            stock_symbol_undownloadable_filename = 'CSV/undownloadable_stock_code.csv',
+            symbol_last_update_filename = 'JSON/symbol_update.json',
+        ):
         # store the file path of stock code
-        self.stock_symbol_file='CSV/S&P 500 Historical Components & Changes (Updated).csv'
-        # store the file path of the stock code which the data of the stock was downloadble
-        self.stock_symbol_file_downloadable='CSV/downloadable_stock_code.csv'
+        self.stock_symbol_file = stock_symbol_file
+        # store the file path of the downloadable stock code
+        self.stock_symbol_downloadable_filename = stock_symbol_downloadable_filename
+        # store the file path of the undownloadable stock code
+        self.stock_symbol_undownloadable_filename = stock_symbol_undownloadable_filename
+        # store the date of last update of individual stock data
+        self.symbol_last_update_filename = symbol_last_update_filename
 
     # this function retrieve the symbols of constituent stocks of the Standard & Poor’s 500 (S&P500) on a specified date from a csv file
     # input:
     # 1. trading_date: the trading date on which the list of S&P500 stocks were (This is the date to determine the list of S&P500 stocks. The list of symbols must be on or before <trading_date>)
     # output:
     # 1. a list of symbols
-    def get_symbol_from_csv(self, trading_date):
+    def get_symbol_from_csv(
+            self, 
+            trading_date
+        ):
         symbol=[]
         # using the list of symbols of S&P500 stocks from github
         ## Reference: <https://github.com/fja05680/sp500/blob/master/S%26P%20500%20Historical%20Components%20%26%20Changes%20(Updated).csv>
-        filename=self.stock_symbol_file
-        with open(filename) as f:
+        with open(self.stock_symbol_file) as f:
             csv_str = f.read()
         lines = csv_str.split('\n')
 
@@ -44,7 +63,6 @@ class APIFinData:
                 continue
 
             # split the line of content
-
             ## if the <trading_date> was the same as the trading date, use the trading date
             if pd.Timestamp(tickers[0]) == pd.Timestamp(trading_date):
                 tickers = lines[line].split(',')
@@ -62,16 +80,20 @@ class APIFinData:
             return symbol
 
     # get the financial data from external API
-    ## input:
-    ### symbol: the stock code e.g. "MSFT", "MU"
-    ## output:
-    ### raw_data: the dataframe from the external API
-    def get_financial_data(self, symbol, period_end):
+    # input:
+    # 1. symbol: the stock code e.g. "MSFT", "MU"
+    # 2. period_end: the end date of the period in string format 'yyyy-mm-dd' or pandas timestamp
+    # output:
+    # 1. raw_data: the dataframe from the external API
+    def get_financial_data(
+            self, 
+            symbol, 
+            period_end
+        ):
         fm = file_mgt.FileMgt()
         # check the last update of the stock data
-        symbol_last_update_filename = 'JSON/symbol_update.json'
-        if fm.check_file_exist(symbol_last_update_filename):
-            symbol_last_update = fm.read_json(symbol_last_update_filename)
+        if fm.check_file_exist(self.symbol_last_update_filename):
+            symbol_last_update = fm.read_json(self.symbol_last_update_filename)
         else:
             symbol_last_update = {}
 
@@ -83,9 +105,8 @@ class APIFinData:
         
         # check if the symbol has been tried but not downloadable
         ## reduce the number of requests made to the API
-        undownloadable_filename='CSV/undownloadable_stock_code.csv'
-        if fm.check_file_exist(undownloadable_filename) and not is_force_download:
-            undownloadable_symbols = fm.read_from_csv(undownloadable_filename)
+        if fm.check_file_exist(self.stock_symbol_undownloadable_filename) and not is_force_download:
+            undownloadable_symbols = fm.read_from_csv(self.stock_symbol_undownloadable_filename)
             if symbol in undownloadable_symbols:
                 # return None, if tried downloading but unsuccessful
                 return None
@@ -114,22 +135,21 @@ class APIFinData:
         ## check if the data was saved in files to reduce the number of requests made to API and save time
         if not fm.check_file_exist(pickle_filename) or is_force_download:
             # download the data from external source if not exist
-            raw_data = yf.download(symbol, period='max', auto_adjust=True)
+            raw_data = yf.download(symbol, start='2022-01-01', auto_adjust=True)
             # update the last update to the time of downloading
             symbol_last_update[symbol] = str(pd.Timestamp.now())
             fm.write_to_json(
                 to_json_content=symbol_last_update,
-                filename=symbol_last_update_filename
+                filename=self.symbol_last_update_filename
             )
             # wait to avoid abuse the API
             time.sleep(0.001)
 
             # check if the raw data is empty
-            # record downloadable and undownloadable symbols in CSV files
-            downloadable_filename='CSV/downloadable_stock_code.csv'
+            # record downloadable and undownloadable symbols in CSV files for reference
             if raw_data is None or int(raw_data.size) < 1:
-                if fm.check_file_exist(undownloadable_filename):
-                    undownloadable_symbols = fm.read_from_csv(undownloadable_filename)
+                if fm.check_file_exist(self.stock_symbol_undownloadable_filename):
+                    undownloadable_symbols = fm.read_from_csv(self.stock_symbol_undownloadable_filename)
                 else:
                     undownloadable_symbols = []
                 if symbol not in undownloadable_symbols:
@@ -138,12 +158,12 @@ class APIFinData:
                     for sym in undownloadable_symbols:
                         to_csv_str += str(sym) + ','
                     fm.write_csv(
-                        csv_file_path=undownloadable_filename,
+                        csv_file_path=self.stock_symbol_undownloadable_filename,
                         to_csv_content=to_csv_str,
                     )
                 return None
-            if fm.check_file_exist(downloadable_filename):
-                downloadable_symbols = fm.read_from_csv(downloadable_filename)
+            if fm.check_file_exist(self.stock_symbol_downloadable_filename):
+                downloadable_symbols = fm.read_from_csv(self.stock_symbol_downloadable_filename)
             else:
                 downloadable_symbols = []
             if symbol not in downloadable_symbols:
@@ -152,7 +172,7 @@ class APIFinData:
                 for sym in downloadable_symbols:
                     to_csv_str += str(sym) + ','
                 fm.write_csv(
-                    csv_file_path=downloadable_filename,
+                    csv_file_path=self.stock_symbol_downloadable_filename,
                     to_csv_content=to_csv_str,
                 )
 
@@ -169,9 +189,10 @@ class APIFinData:
 
     # finding the n (default: the first, if n is None) timestamp in the pandas frame from yfinance
     # input: 
-    ## 1. df: data frame storing a single stock
-    ## 2. n: (int) the Nth day in the data frame
-    # output: the n timestamp in the input data frame, in the format of pandas timestamp
+    # 1. df: data frame storing a single stock
+    # 2. n: (int) the Nth day in the data frame
+    # output: 
+    # 1. the n timestamp in the input data frame, in the format of pandas timestamp
     @staticmethod
     def get_nth_date(df, n=None):
         # finding the 1st day in the data frame
@@ -193,13 +214,26 @@ class APIFinData:
                 return pd.Timestamp(df_dict_key_time[-1])
 
     # converting data the json format and save to a file (append the content)
+    # input:
+    # 1. to_json_content: content in dict{}
+    # 2. filename: the file path of the JSON file
+    # output:
+    # No return value
+    # JSON file content was added
     @staticmethod
-    def append_to_json(to_json_content, filename):
+    def append_to_json(
+            to_json_content, 
+            filename
+        ):
         content = json.dumps(to_json_content)
         with open(filename, 'a') as f:
             f.write(content)
 
     # reading pickle from binary file
+    # input:
+    # 1. filename: the file path of pickle file
+    # output:
+    # 1. the file content
     @staticmethod
     def read_from_pickle_binary_file(filename):
         with open(filename, 'rb') as f:
@@ -207,8 +241,17 @@ class APIFinData:
         return pickle.loads(data)
 
     # writing pickle to binary file
+    # input:
+    # 1. filename: file path
+    # 2. data: the content to be written to the file
+    # output:
+    # No return value
+    # content written to pickle file
     @staticmethod
-    def write_to_pickle_binary_file(filename, data):
+    def write_to_pickle_binary_file(
+            filename, 
+            data
+        ):
         pickled_data=pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
         with open(filename, 'wb') as f:
             f.write(pickled_data)

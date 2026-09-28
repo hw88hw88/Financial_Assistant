@@ -10,6 +10,7 @@ class Simulation:
     # 2. fin_end: the date of the end of the period
     # 3. trading_fee: the percentage of the trading fee. For example, 0.01 means 1% of the trading amount
     def __init__(self, fin_start, fin_end, trading_fee):
+        # initialize API
         self.api=api_fin_data.APIFinData()
         self.fin_start=fin_start
         self.fin_end=fin_end
@@ -27,7 +28,7 @@ class Simulation:
             st, 
             symbol, 
             risk_free_interest_rate = 0.03
-            ):
+        ):
         # retrieve the data from API or saved file
         raw_data=self.api.get_financial_data(
             symbol=symbol,
@@ -191,7 +192,12 @@ class Simulation:
     # 3. st: the strategy
     # output:
     # 1. numpy array storing the symbol of the selected stocks
-    def sorting_stocks(self, date_timestamp, stocks_df, st):
+    def sorting_stocks(
+            self, 
+            date_timestamp, 
+            stocks_df, 
+            st
+        ):
         # store the selected stocks
         selected_stocks={}
 
@@ -219,16 +225,16 @@ class Simulation:
 
             ## if the stock is in the portfolio
             if symbol in st.stocks.keys():
-                if st.stock_cumulative_return[symbol] is not None:
-                    stock_cumulative_return = st.stock_cumulative_return[symbol]
+                if st.stock_roi[symbol] is not None:
+                    stock_roi = st.stock_roi[symbol]
                     ### checking 'stop loss'
                     ### if the cumulative return was calculated for the stock in the portfolio, and the return is under the stop loss (stop loss should be negative, e.g. -3%)
-                    if stock_cumulative_return < (-1 * abs(st.gdict['stop_loss'])):
+                    if stock_roi < (-1 * abs(st.gdict['stop_loss'])):
                         # this stock will not be selected
                         continue
 
                     ### checking 'take profit'
-                    if stock_cumulative_return > (st.gdict['take_profit']):
+                    if stock_roi > (st.gdict['take_profit']):
                         # this stock will not be selected
                         continue
 
@@ -259,9 +265,14 @@ class Simulation:
     # return all stocks with financial indicators of the financial period
     # input:
     # 1. st: an investment strategy instance
+    # 2. trading_date: trading date
     # output:
-    # 2. stocks_df: A list of data frame of all the stocks in the financial period
-    def get_stock_fin_indicator(self, st, trading_date=None):
+    # 1. stocks_df: A list of data frame of all the stocks in the financial period
+    def get_stock_fin_indicator(
+            self, 
+            st, 
+            trading_date=None
+        ):
         if trading_date is None:
             trading_date = self.fin_start
         # get the symbol of available stocks in S&P500

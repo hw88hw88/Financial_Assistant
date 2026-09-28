@@ -25,9 +25,10 @@ class Genome:
     The code of the mid-term coursework was written with reference to the starter code of the mid-term coursework of "CM3020 Artificial Intelligence" (Yee-King, no date)
     '''
     # generate a random float
-    # Input: None
+    # Input:
+    # 1. gene_length: the length of gene list
     # Output: 
-    ## 1. a random float [0, 1), 0 is inclusive, but 1 is excluded
+    ## 1. a list of random float [0, 1), 0 is inclusive, but 1 is excluded
     @staticmethod
     def get_random_gene(gene_length):
         ## generate random number [0, 1), 0 is inclusive, but 1 is excluded
@@ -263,7 +264,8 @@ class Genome:
     # Single point crossover
     ## New genome was made from the first part of g1 and last part of g2
     # input: 
-    # 1. DNA of 2 strategies
+    # 1. g1: DNA of a strategy
+    # 2. g2: DNA of another strategy
     # output: 
     # 1. a new dna made with g1 mixing with g2
     @staticmethod

@@ -6,15 +6,16 @@ import datetime
 import re
 import json
 import numpy as np
-
 from llama_cpp import Llama
 
 class Chatbot:
     # initialize the chatbot
     # the function runs after being called, not run automatically at the start
+    # input:
+    # 1. model_path: the file path of the LLM gguf file
     def initialize_chatbot(
-        self,
-        model_path = "LLM/gemma-4-E2B-it-qat-q4_0-gguf/gemma-4-E2B_q4_0-it.gguf"
+            self,
+            model_path = "LLM/gemma-4-E2B-it-qat-q4_0-gguf/gemma-4-E2B_q4_0-it.gguf"
         ):
         self.max_token=4096
         ## loading the LLM
@@ -33,8 +34,8 @@ class Chatbot:
     # 2. None, if run_id cannot be retrieved
     @staticmethod
     def get_run_id(
-        num_of_run = 0, 
-        run_id_file_path = 'CSV/run_id.csv',
+            num_of_run = 0, 
+            run_id_file_path = 'CSV/run_id.csv',
         ):
         fm = file_mgt.FileMgt()
 
@@ -76,9 +77,9 @@ class Chatbot:
     # 3. None, if either hyper-parameters of the training or gdict cannot be retrieved
     @staticmethod
     def get_strategy(
-        run_id,
-        hyper_params_file_path=None,
-        gdict_file_path=None
+            run_id,
+            hyper_params_file_path=None,
+            gdict_file_path=None
         ):
         fm = file_mgt.FileMgt()
         # get training hyper-parameters
@@ -129,7 +130,8 @@ class Chatbot:
     def get_data(
             trading_date,
             st,
-            trading_fee=0.01):
+            trading_fee=0.01
+        ):
 
         # setting the start and end the same date to get the financial data on the trading day
         sim = simulation.Simulation(
@@ -178,40 +180,46 @@ class Chatbot:
     # 1. trading_date: (str) the trading date in the format 'yyyy-mm-dd'
     # 2. num_of_run: (int) the run id number. E.g. 0 means the first run_id in the CSV file
     # 3. trading_fee: (float) the trading fee. E.g. 0.01 means 1% of the trading amount
+    # 4. run_id_file_path: (string) the file path of the run id CSV file
+    # 5. hyper_params_file_path: (string) the file path of the hyper-parameter file
+    # 6. gdict_file_path: (string) the file path of the gdict file
     # output:
     # 1. portfolio: a list of stock symbols
     # 2. portfolio_dict: a dictionary of information of stocks in portfolio
     # 3. st: an investment strategy
     # 4. gdict: dictionary of gene of strategy
     def apply_strategy(
-        self,
-        trading_date,
-        num_of_run = 0,
-        trading_fee = 0.01,
-        run_id_file_path = 'CSV/run_id.csv',
-        hyper_params_file_path=None,
-        gdict_file_path=None
+            self,
+            trading_date,
+            num_of_run = 0,
+            trading_fee = 0.01,
+            run_id_file_path = 'CSV/run_id.csv',
+            hyper_params_file_path=None,
+            gdict_file_path=None
         ):
+        # get run id
         run_id = self.get_run_id(
             num_of_run = num_of_run,
             run_id_file_path = run_id_file_path,
         )
-
+        # get the strategy and gdict
         st, gdict = self.get_strategy(
             run_id = run_id,
             hyper_params_file_path=hyper_params_file_path,
             gdict_file_path=gdict_file_path,
         )
-
+        # strategy should not be None
         if st is None:
             print('st is None')
             return None
 
+        # the pandas data frame of all stocks
         stocks_df = self.get_data(
             trading_date = trading_date,
             st = st,
             trading_fee = trading_fee)
 
+        # get a list of symbols of the stocks in portfolio
         portfolio = self.get_investment_portfolio(
             st = st,
             stocks_df = stocks_df,
@@ -219,9 +227,10 @@ class Chatbot:
             trading_fee=trading_fee
         )
 
-        # store the portfolio stock data
+        # store the portfolio stock data in dict{}
         portfolio_dict = {}
 
+        # process each stock one by one
         for stock_df in stocks_df:
             # convert to python dict{}
             stock_dict = stock_df.to_dict()
@@ -229,6 +238,7 @@ class Chatbot:
             ## current stock symbol
             symbol=(list(stock_dict.keys())[0][1])
 
+            # create the portfolio dict{}
             if symbol in portfolio:
                 portfolio_dict[symbol] = {
                     'symbol': symbol,
@@ -242,75 +252,57 @@ class Chatbot:
                     'annualized_volatility': list(stock_dict['annualized_volatility', ''].values())[0],
                 }
 
-            # investment strategy
+            # store investment strategy in portfolio
             portfolio_dict['stgy'] = {
                 'stop_loss': gdict.get('stop_loss'),
                 'take_profit': gdict.get('take_profit'),
                 'num_of_day_rebalance': gdict.get('num_of_day_rebalance'),
+                'buy_rsi': gdict.get('buy_rsi'),
+                'sell_rsi': gdict.get('sell_rsi'),
             }
 
         return portfolio, portfolio_dict, st, gdict
-
-    # generate the chatbot response
-    # input:
-    # 1. prompt
-    # output:
-    # 1. output: the text output of the LLM
-    def generate_response(self, prompt):
-        # initialize the chatbot at the first time of running
-        if getattr(self, 'llm', None) is None:
-            self.initialize_chatbot()
-
-        try:
-            output = self.llm(
-                'User: ' + prompt + '. Assistant: ',
-                max_tokens=self.max_token,
-                stop=["User:"],
-                echo=False
-            )
-            raw_response = output.get('choices', [])
-            return raw_response[0].get('text', '')
-        except Exception as e:
-            print('Error: ', e)
-            return ''
 
     # classify the user input with the LLM
     # input:
     # 1. user_prompt: (str) user prompt
     # output:
     # 1. a dict of result
-    def identify_user_input(self, user_prompt):
+    def identify_user_input(
+            self, 
+            user_prompt
+        ):
         # initialize the chatbot at the first time of running
         if getattr(self, 'llm', None) is None:
             self.initialize_chatbot()
 
         # prepare the prompt
         today_date = datetime.datetime.now()
-        today_date = today_date.strftime('%Y-%m-%d')
+        day_of_week = today_date.strftime("%A")
+        today_date = today_date.strftime('%Y-%m-%d')        
 
-        prompt = f"""Today's date is {today_date}.
-
-        You are a professional financial advisor. Your task is to classify user input into a JSON object.
+        prompt = f"""You are a professional financial advisor. Your task is to classify user input into a JSON object.
+        Today: {today_date} ({day_of_week})
 
         Rules:
         1. investment: boolean (true if the user expresses intent to invest)
         2. investment_explanation: boolean (true if the user ask for explanation of recommendations)
-        3. prefer_low_risk: string (balanced or high or low, null if not mentioned)
+        3. risk_tolerance: string (high or low or medium, null if not mentioned)
         4. investment_date: string ('yyyy-mm-dd' or 'yy-m-d' or null).
             - If no date is mentioned: null;
             - If today is mentioned: {today_date};
-            - If a future date is mentioned: {today_date};
-            - If a past date is mentioned: that specific date (that specific date must be on or after '2024-01-01');
-            - If the date is before '2024-01-01': '2024-01-01'.
 
         Example Output Format:
-        {{"investment": true, "investment_explanation": false, "prefer_low_risk": false, "investment_date": null}}
+        {{"investment": true, "investment_explanation": false, "risk_tolerance": null, "investment_date": null}}
 
         User Input: "{user_prompt}"
 
         Please return valid JSON only."""
 
         try:
+            # initialize the variable
+            raw_response = None
+            # call the LLM
             output = self.llm(
                 'User: ' + prompt + '. Assistant: ',
                 max_tokens=self.max_token,
@@ -318,7 +310,7 @@ class Chatbot:
                 echo=False,
                 temperature=0,
             )
-
+            # get the response in text
             raw_response = output.get('choices', [])
             if not raw_response:
                 raise ValueError
@@ -326,10 +318,10 @@ class Chatbot:
             response = re.search('{.*}', raw_response, re.S)
             if response:
                 return json.loads(response.group())
-            return {"investment": False, "investment_explanation": False, "prefer_low_risk": None, "investment_date": None, "error": "Invalid response", "raw_response": raw_response}
+            return {"investment": False, "investment_explanation": False, "risk_tolerance": None, "investment_date": None, "error": "Invalid response", "raw_response": raw_response}
         except Exception as e:
             print('Error: ', e)
-            return {"investment": False, "investment_explanation": False, "prefer_low_risk": None, "investment_date": None, "error": str(e), "raw_response": raw_response}
+            return {"investment": False, "investment_explanation": False, "risk_tolerance": None, "investment_date": None, "error": str(e), "raw_response": raw_response}
 
     # classify the types of response to be generated
     # input:
@@ -338,7 +330,7 @@ class Chatbot:
     # 3. hyper_params_file_path: the file path of hyper-parameters
     # 4. gdict_file_path: the file path of the gdict file
     # output:
-    # 1. prompt: (str) a prompt to LLM to generate response
+    # 1. chatbot_response: (str) chatbot response
     def classify_response(
         self, 
         user_prompt_dict,
@@ -346,28 +338,47 @@ class Chatbot:
         hyper_params_file_path = None,
         gdict_file_path = None,
         ):
-        # default: balanced profile
-        num_of_run = 4
+        # default: medium profile
+        num_of_run = 0
         
         # determining the strategy based on the risk level
-        if user_prompt_dict.get('prefer_low_risk') == 'low':
+        if user_prompt_dict.get('risk_tolerance') == 'low':
             # low risk profile
-            num_of_run = 3
-        elif user_prompt_dict.get('prefer_low_risk') == 'high':
+            num_of_run = 2
+        elif user_prompt_dict.get('risk_tolerance') == 'high':
             # high return and high risk profile
-            num_of_run = 5
+            num_of_run = 1
 
         # get investment date
         investment_date = None
+        today_date = datetime.datetime.now()
         if user_prompt_dict.get('investment_date'):
-            investment_date = user_prompt_dict.get('investment_date')
-        else:
-            today_date = datetime.datetime.now()
-            investment_date = today_date.strftime('%Y-%m-%d')
+            # check the range of the investment date
+            start_date = datetime.datetime(2024, 1, 1)
 
+            user_input_date = str(user_prompt_dict.get('investment_date'))
+            user_input_date = user_input_date.split('-')
+            user_input_date = datetime.datetime(
+                int(user_input_date[0]), 
+                int(user_input_date[1]), 
+                int(user_input_date[2])
+                )
+
+            if start_date <= user_input_date and user_input_date <= today_date:
+                investment_date = user_input_date.strftime('%Y-%m-%d')
+            elif start_date > user_input_date:
+                investment_date = start_date.strftime('%Y-%m-%d')
+            else:
+                investment_date = today_date.strftime('%Y-%m-%d')
+
+        # initialize the variable response_type
+        response_type = 4
         # type 1 response:
         # identify if user mentioned investment
         if user_prompt_dict.get('investment_explanation'):
+            # if no date is provided, the chatbot assume 'today' to generate investment explanation
+            if not user_prompt_dict.get('investment_date'):
+                investment_date = today_date.strftime('%Y-%m-%d')
             # get investment portfolio with detailed explanation
             portfolio, portfolio_dict, st, gdict = self.apply_strategy(
                 trading_date = investment_date,
@@ -377,119 +388,355 @@ class Chatbot:
                 hyper_params_file_path=hyper_params_file_path,
                 gdict_file_path=gdict_file_path,
             )
-            prompt = self.generate_prompt(
-                type = 1, 
+            response_type = 1
+            chatbot_response = self.generate_response(
+                response_type = response_type, 
                 portfolio = portfolio, 
                 portfolio_dict = portfolio_dict, 
-                trading_date= investment_date,
-                gdict=gdict,
+                trading_date = investment_date,
+                gdict = gdict,
+                risk_tolerance=user_prompt_dict.get('risk_tolerance'),
             )
         # type 2 response:
         elif user_prompt_dict.get('investment'):
+            # if no date is provided, the chatbot assume 'today' to generate investment explanation
+            if not user_prompt_dict.get('investment_date'):
+                investment_date = today_date.strftime('%Y-%m-%d')
             # get investment portfolio
             portfolio, portfolio_dict, st, gdict = self.apply_strategy(
                 trading_date = investment_date,
                 num_of_run = num_of_run,
                 trading_fee = 0.01,
                 run_id_file_path = run_id_file_path,
-                hyper_params_file_path=hyper_params_file_path,
-                gdict_file_path=gdict_file_path,
+                hyper_params_file_path = hyper_params_file_path,
+                gdict_file_path = gdict_file_path,
             )
-            prompt = self.generate_prompt(
-                type = 2, 
+            response_type = 2
+            chatbot_response = self.generate_response(
+                response_type = response_type, 
                 portfolio = portfolio, 
                 portfolio_dict = portfolio_dict, 
                 trading_date = investment_date,
-                gdict=gdict,
+                gdict = gdict,
+                risk_tolerance=user_prompt_dict.get('risk_tolerance'),
+            )
+        # type 3 response:
+        elif investment_date is not None:
+            response_type = 3
+            chatbot_response = self.generate_response(
+                response_type = response_type,
+                portfolio = None,
+                portfolio_dict = None,
+                trading_date = investment_date,
+                gdict = None,
+                risk_tolerance=user_prompt_dict.get('risk_tolerance'),
             )
 
-        # type 3 response:
+        # type 4 response:
         # greeting and introduce the financial advisor services to the user
         else:
-            prompt = self.generate_prompt()
-        return prompt
+            response_type = 4
+            chatbot_response = self.generate_response(
+                response_type = response_type,
+                portfolio = None,
+                portfolio_dict = None,
+                trading_date = None,
+                gdict = None,
+                risk_tolerance=user_prompt_dict.get('risk_tolerance'),
+            )
+            
+        return chatbot_response, response_type
 
-    # generate the prompt based on the classified sponse type
+    # generate the response based on the classified response type
     # input:
-    # 1. type: the type of response (e.g. about investment, or about investment explanation)
-    def generate_prompt(
+    # 1. response_type: the type of response (e.g. about investment, or about investment explanation)
+    # 2. portfolio: a list of stock symbols
+    # 3. portfolio_dict: a dictionary of information of stocks in portfolio from apply_strategy()
+    # 4. trading_date: the date of trading day
+    # 5. gdict: gdict of the strategy
+    # output:
+    # 1. response in a string
+    def generate_response(
             self,
-            type=None, 
+            response_type=None, 
             portfolio=None, 
             portfolio_dict=None, 
             trading_date=None,
             gdict=None,
+            risk_tolerance=None
             ):
-        # type 1:
+
+        # response type 1:
         # explain the investment portfolio and strategy clearly
-        if type == 1:
-            if portfolio is None or portfolio_dict is None or trading_date is None or gdict is None:
-                return None
-            # prepare the prompt
-            prompt = f"""
-            As a financial assistant, you need to recommend the investment portfolio of the stock(s) {portfolio} to the user on {trading_date}.
+        if (
+                response_type == 1 and 
+                portfolio is not None and 
+                portfolio_dict is not None and 
+                trading_date is not None and 
+                gdict is not None
+            ):
+            date = str(trading_date)
+            date = date.split('-')
+            date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+            day_of_week = date.strftime("%A")
 
-            Strategy:
-                Stop Loss: {np.round(portfolio_dict.get('stgy').get('stop_loss'), 2)}
-                Take Profit: {np.round(portfolio_dict.get('stgy').get('take_profit'), 2)}
-                Number of days to rebalance: {portfolio_dict.get('stgy').get('num_of_day_rebalance')}
+            next_rebalance_date = date + datetime.timedelta(days=portfolio_dict.get('stgy').get('num_of_day_rebalance'))
+            day_of_week_next_rebal = next_rebalance_date.strftime("%A")
+            next_rebalance_date = next_rebalance_date.strftime('%Y-%m-%d')
+
+            if risk_tolerance is None:
+                risk_tolerance = 'medium'
+            chatbot_response = f"""
+            <p>
+                The explanation of the investment portfolio for {trading_date} ({day_of_week}) is as follows:
+            </p>
+            <p>
+                The risk tolerance is {risk_tolerance}.
+            </p>
+            <ul>
             """
-
             for p in portfolio:
-                prompt = prompt + f"""
-                    stock: {portfolio_dict.get(p).get('symbol')}
-                    Price on {trading_date}: {np.round(portfolio_dict.get(p).get('price'), 2)}
-                    Financial indicators:
-                        Simple Moving Average (SMA) Short: {np.round(portfolio_dict.get(p).get('ma_short'), 2)} ({gdict.get('ma_short')} days);
-                        Simple Moving Average (SMA) Long: {np.round(portfolio_dict.get(p).get('ma_long'), 2)} ({gdict.get('ma_long')} days);
-                        Relative Strength Index (RSI): {np.round(portfolio_dict.get(p).get('rsi'), 2)} ({gdict.get('rsi_period')} day(s));
-                        Sharpe Ratio: {np.round(portfolio_dict.get(p).get('sharpe_ratio'), 2)};
-                        Annualized Return: {np.round(portfolio_dict.get(p).get('annualized_return'), 2)}; and
-                        Annualized Volatility: {np.round(portfolio_dict.get(p).get('annualized_volatility'), 2)}.
+                chatbot_response += f"""
+                    <li>
+                        {p}
+                        <ul>
+                            <li>
+                                Price: {np.round(portfolio_dict.get(p).get('price'), 2)}
+                            </li>               
+                            <li>
+                                Simple Moving Average (SMA) Short: {np.round(portfolio_dict.get(p).get('ma_short'), 2)} ({gdict.get('ma_short')} days);
+                            </li>
+                            <li>
+                                Simple Moving Average (SMA) Long: {np.round(portfolio_dict.get(p).get('ma_long'), 2)} ({gdict.get('ma_long')} days);
+                            </li>
+                            <li>
+                                Relative Strength Index (RSI): {np.round(portfolio_dict.get(p).get('rsi'), 2)} ({gdict.get('rsi_period')} day(s));
+                            </li>
+                            <li>
+                                Sharpe Ratio: {np.round(portfolio_dict.get(p).get('sharpe_ratio'), 2)};
+                            </li>
+                            <li>
+                                Annualized Return: {np.round(portfolio_dict.get(p).get('annualized_return'), 2)};
+                            </li>
+                            <li>
+                                Annualized Volatility: {np.round(portfolio_dict.get(p).get('annualized_volatility'), 2)}.
+                            </li>
+                        </ul>
+                    </li>
+                    <br>
                 """
+                # Comment on SMA
+                if np.round(portfolio_dict.get(p).get('ma_short'), 2) > np.round(portfolio_dict.get(p).get('ma_long'), 2):
+                    chatbot_response += f'<p>The SMA Short ({np.round(portfolio_dict.get(p).get('ma_short'), 2)}) is higher than SMA Long ({np.round(portfolio_dict.get(p).get('ma_long'), 2)}). This is a signal of short-term bullish trend for the stock {p}.</p>'
 
-            prompt = prompt + """
-                Please provide investment recommendations to the user.
-                Explain the recommendations based on the financial indicators and strategy provided.
-                For each stock in the portfolio, your response should include:
-                    the price, 
-                    Comparing Simple Moving Average Short with Simple Moving Average Long,
-                    Relative Strength Index,
-                    Sharpe ratio,
-                    Annualized Volatility, and
-                    Annualized Return
-                Please reply to the user on behalf of me directly and do not quote me.
-                Please output the text in a body tag of HTML without any interactive elements.
-                """
-        # type 2:
-        elif type == 2:
-            if portfolio is None or portfolio_dict is None or trading_date is None:
-                return None
-            # prepare the prompt
-            prompt = f"""
-            You are the user's financial assistant.
-            You need to recommend an investment portfolio of the stock(s) {portfolio} on {trading_date} to the user.
-            Strategy:
-                Stop Loss: {np.round(portfolio_dict.get('stgy').get('stop_loss'), 2)}
-                Take Profit: {np.round(portfolio_dict.get('stgy').get('take_profit'), 2)}
-                Number of days to rebalance: {portfolio_dict.get('stgy').get('num_of_day_rebalance')}
-            You do not need to analyze or explain the portfolio.
-            Please remind the users that they can ask for explanation of the portfolio.
-            Please reply to the user on behalf of me directly and do not quote me.
-            Please output the text in a body tag of HTML without any interactive elements.
+                # comment on RSI
+                if np.round(portfolio_dict.get(p).get('rsi'), 2) < portfolio_dict.get('stgy').get('buy_rsi'):
+                    chatbot_response += f'<p>The RSI {np.round(portfolio_dict.get(p).get('rsi'), 2)} of the stock {p} is low. The price for the stock is attractive, and the stock {p} is highly recommended to put in the portfolio.</p>'
+                elif np.round(portfolio_dict.get(p).get('rsi'), 2) < portfolio_dict.get('stgy').get('sell_rsi'):
+                    chatbot_response += f'<p>The RSI {np.round(portfolio_dict.get(p).get('rsi'), 2)} of the stock {p} is in the normal range, neither too high nor too low.</p>'
+
+                # comment on Sharpe ratio
+                if np.round(portfolio_dict.get(p).get('sharpe_ratio'), 2) > 2:
+                    chatbot_response += f'<p>The sharpe ratio {np.round(portfolio_dict.get(p).get('sharpe_ratio'), 2)} of the stock {p} is greater than 2. The stock is highly recommended.</p>'
+                elif np.round(portfolio_dict.get(p).get('sharpe_ratio'), 2) > 1:
+                    chatbot_response += f'<p>The sharpe ratio {np.round(portfolio_dict.get(p).get('sharpe_ratio'), 2)} of the stock {p} is greater than 1. The stock is recommended.</p>'
+
+                # comment on annualized_return
+                if np.round(portfolio_dict.get(p).get('annualized_return'), 2) > 1:
+                    chatbot_response += f'<p>The high annualized return of the stock {p} made the stock be put in the portfolio. The higher the annualized return, the more profitable the stock is.</p>'
+
+                # commnet on annualized volatility
+                if np.round(portfolio_dict.get(p).get('annualized_volatility'), 2) < 0.5:
+                    chatbot_response += f'<p>The annualized volatility reflects the risk of the stock. The lower the volatility, the lower the risk. {np.round(portfolio_dict.get(p).get('annualized_volatility'), 2)} is very low.</p>'
+                elif np.round(portfolio_dict.get(p).get('annualized_volatility'), 2) < 1:
+                    chatbot_response += f'<p>The annualized volatility reflects the risk of the stock. The lower the volatility, the lower the risk. {np.round(portfolio_dict.get(p).get('annualized_volatility'), 2)} is low.</p>'
+            # investment strategy
+            chatbot_response += f"""
+            </ul>
+                <p>
+                    The investment strategy:
+                </p>
+                <ul>
+                    <li>
+                        Your capital should equally allocated to the stocks. About {1/len(portfolio) * 100}% of your capital should be allocated to each stock.
+                    </li>
+                    <li>
+                        Stop Loss: {np.round(portfolio_dict.get('stgy').get('stop_loss'), 2) * 100}%
+                    </li>
+                    <li>
+                        Take Profit: {np.round(portfolio_dict.get('stgy').get('take_profit'), 2) * 100}%
+                    </li>
+                    <li>
+                        Number of days to rebalance: {portfolio_dict.get('stgy').get('num_of_day_rebalance')} day(s)
+                    </li>
+                    <li>
+                        Relative Strength Index (RSI) is high: > {portfolio_dict.get('stgy').get('sell_rsi')}
+                    </li>
+                    <li>
+                        Relative Strength Index (RSI) is low: < {portfolio_dict.get('stgy').get('buy_rsi')}
+                    </li>
+                    <li>
+                        Relative Strength Index (RSI) is normal: > {portfolio_dict.get('stgy').get('buy_rsi')} and < {portfolio_dict.get('stgy').get('sell_rsi')}
+                    </li>
+                </ul>
+                <br>
+                <p>How to implement the strategy:</p>
+                <ul>
+                    <li>
+                        Stop Loss:
+                        <br>
+                        The negative sign means a loss. 
+                        <br>
+                        You should sell the stock when the loss of the stock is more than {-np.round(portfolio_dict.get('stgy').get('stop_loss'), 2) * 100}%. 
+                        <br>
+                        After selling it, you should hold the cash until the next rebalance day, which is {next_rebalance_date} ({day_of_week_next_rebal}).
+                    </li>
+                    <li>
+                        Take Profit: 
+                        <br>
+                        You should sell the stock when the return on the stock is more than {np.round(portfolio_dict.get('stgy').get('take_profit'), 2) * 100}%. 
+                        <br>
+                        After selling it, you should hold the cash until the next rebalance day, which is {next_rebalance_date} ({day_of_week_next_rebal}).
+                    </li>
+                    <li>
+                        Number of days to rebalance: 
+                        <br>
+                        You should ask me the recommended investment portfolio on {next_rebalance_date} ({day_of_week_next_rebal}), because the next rebalance day is {portfolio_dict.get('stgy').get('num_of_day_rebalance')} day(s) after {trading_date} ({day_of_week}).
+                        <br>
+                        You are reminded to tell me your risk tolerance is {risk_tolerance} on that day, because your data is not saved in the chatbot, and your queries are annonymous.
+                    </li>
+                </ul>
             """
-        # type 3:
+
+        # response type 2:
+        elif (
+                response_type == 2 and 
+                portfolio is not None and 
+                portfolio_dict is not None and 
+                trading_date is not None and 
+                gdict is not None
+            ):
+            # prepare the prompt
+            date = str(trading_date)
+            date = date.split('-')
+            date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+            day_of_week = date.strftime("%A")
+
+            if risk_tolerance is None:
+                risk_tolerance='medium'
+        
+            chatbot_response = f"""
+            <p>
+                I recommend the following investment portfolio for {trading_date} ({day_of_week}) to you:
+            </p>
+            <p>
+                The risk tolerance is {risk_tolerance}.
+            </p>
+            <ul>
+            """
+            for p in portfolio:
+                chatbot_response += f"""
+                    <li>
+                        {p}
+                        <ul>
+                            <li>
+                                Price: {np.round(portfolio_dict.get(p).get('price'), 2)}
+                            </li>               
+                            <li>
+                                Simple Moving Average (SMA) Short: {np.round(portfolio_dict.get(p).get('ma_short'), 2)} ({gdict.get('ma_short')} days);
+                            </li>
+                            <li>
+                                Simple Moving Average (SMA) Long: {np.round(portfolio_dict.get(p).get('ma_long'), 2)} ({gdict.get('ma_long')} days);
+                            </li>
+                            <li>
+                                Relative Strength Index (RSI): {np.round(portfolio_dict.get(p).get('rsi'), 2)} ({gdict.get('rsi_period')} day(s));
+                            </li>
+                            <li>
+                                Sharpe Ratio: {np.round(portfolio_dict.get(p).get('sharpe_ratio'), 2)};
+                            </li>
+                            <li>
+                                Annualized Return: {np.round(portfolio_dict.get(p).get('annualized_return'), 2)};
+                            </li>
+                            <li>
+                                Annualized Volatility: {np.round(portfolio_dict.get(p).get('annualized_volatility'), 2)}.
+                            </li>
+                        </ul>
+                    </li>
+                """
+            chatbot_response += f"""
+            </ul>
+                <p>
+                    The investment strategy:
+                </p>
+                <ul>
+                    <li>
+                        Your capital should equally allocated to the stocks. About {1/len(portfolio) * 100}% of your capital should be allocated to each stock.
+                    </li>
+                    <li>
+                        Stop Loss: {np.round(portfolio_dict.get('stgy').get('stop_loss'), 2) * 100}%
+                    </li>
+                    <li>
+                        Take Profit: {np.round(portfolio_dict.get('stgy').get('take_profit'), 2) * 100}%
+                    </li>
+                    <li>
+                        Number of days to rebalance: {portfolio_dict.get('stgy').get('num_of_day_rebalance')} day(s)
+                    </li>
+                    <li>
+                        Relative Strength Index (RSI) is high: > {portfolio_dict.get('stgy').get('sell_rsi')}
+                    </li>
+                    <li>
+                        Relative Strength Index (RSI) is low: < {portfolio_dict.get('stgy').get('buy_rsi')}
+                    </li>
+                    <li>
+                        Relative Strength Index (RSI) is normal: > {portfolio_dict.get('stgy').get('buy_rsi')} and < {portfolio_dict.get('stgy').get('sell_rsi')}
+                    </li>
+                </ul>
+                <p>
+                    You can ask for an explanation for the portfolio and strategy.
+                </p>
+            """
+        # response type 3:
+        elif (
+                response_type == 3 and
+                trading_date is not None
+            ):
+            # prepare the chatbot_response
+            date = str(trading_date)
+            date = date.split('-')
+            date = datetime.datetime(int(date[0]), int(date[1]), int(date[2]))
+            day_of_week = date.strftime("%A")
+        
+            chatbot_response = f"""<div>
+                Hello! I am your financial assistant. My goal is to build an investment portfolio for you.
+                <br>
+                To help me create the most suitable portfolio for your needs, please provide the following information:
+                <br>
+                <ul>
+                    <li>
+                        <b>Risk Tolerance Level:</b> Please specify if your risk tolerance is High, Low, or Medium.
+                    </li>
+                </ul>
+                You have provided the <b>Date of Investment: {trading_date} ({day_of_week})</b> (The format of date: yyyy-mm-dd).
+            </div>"""
+        # response type 4:
         else:
-            # prepare the prompt
-            prompt = """
-            You are the user's financial assistant.
-            You need to make investment recommendations to the users.
-            The investment recommendation is an investment portfolio on a trading day. The portfolio was built based on the investment strategy generated with the system.
-            You need to ask:
-                the user(s) their risk tolerance level (high, low, or balanced), and 
-                the date of investment. 
-            The date should be between 2024-01-01 and today, since the system was trained with data in 2023.
-            Please output the text in a body tag of HTML without any interactive elements.
-            """
+            # prepare the chatbot_response
+            chatbot_response = """<div>
+                Hello! I am your financial assistant. My goal is to build an investment portfolio for you.
+                <br>
+                To help me create the most suitable portfolio for your needs, please provide the following information:
+                <br>
+                <ul>
+                    <li>
+                        <b>Risk Tolerance Level:</b> Please specify if your risk tolerance is High, Low, or Medium.
+                    </li>
+                    <li>
+                        <b>Date of Investment:</b> Please provide a specific date between 2024-01-01 and today (The format of date: yyyy-mm-dd).
+                    </li>
+                </ul>
+                <p>
+                    Note: You can change your preferences any time. If no date is provided, I will assume today.
+                </p>
+            </div>"""
 
-        return prompt
+        return chatbot_response

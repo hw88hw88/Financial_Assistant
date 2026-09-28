@@ -4,8 +4,7 @@ import file_mgt
 import genome
 import os
 import strategy
-import json
-import re
+
 
 class TestChatbot(unittest.TestCase):
     # test if the class, variables and functions can be created successfully or not
@@ -16,10 +15,9 @@ class TestChatbot(unittest.TestCase):
         self.assertIsNotNone(chatbot.Chatbot.get_data)
         self.assertIsNotNone(chatbot.Chatbot.get_investment_portfolio)
         self.assertIsNotNone(chatbot.Chatbot.apply_strategy)
-        self.assertIsNotNone(chatbot.Chatbot.generate_prompt)
+        self.assertIsNotNone(chatbot.Chatbot.generate_response)
         self.assertIsNotNone(chatbot.Chatbot.classify_response)
         self.assertIsNotNone(chatbot.Chatbot.identify_user_input)
-        self.assertIsNotNone(chatbot.Chatbot.generate_response)
 
     # test the get_strategy()
     def test_get_strategy(self):
@@ -199,9 +197,9 @@ class TestChatbot(unittest.TestCase):
             "Please explain your recommendations.",
             "I'm bored.",
             "How to calculate 1+1?",
-            "My birthday is on 1 January 2030",
-            "Tell me your recommendations yesterday.",
-            "I prefer high return but low risk.",
+            "I don't remember my birthday.",
+            "Tell me your recommendations on 2026-01-03.",
+            "I prefer low risk but high returns.",
             "I can assume high risk."
             ]
 
@@ -213,6 +211,7 @@ class TestChatbot(unittest.TestCase):
             self.assertEqual(str(type(response)), "<class 'dict'>")
             self.assertIsNone(response.get('error'))
             result.append(response)
+        self.assertEqual(len(result), len(user_prompt))
         self.assertEqual(len(result), len(user_prompt))
         self.assertTrue(result[0].get('investment'))
         self.assertTrue(result[0].get('investment_explanation'))
@@ -227,10 +226,10 @@ class TestChatbot(unittest.TestCase):
         self.assertIsNotNone(result[5].get('investment_date'))
         self.assertFalse(result[5].get('investment'))
         self.assertTrue(result[5].get('investment_explanation'))
-        self.assertEqual(result[6].get('prefer_low_risk'), 'low')
+        self.assertEqual(result[6].get('risk_tolerance'), 'low')
         self.assertFalse(result[6].get('investment'))
         self.assertFalse(result[6].get('investment_explanation'))
-        self.assertEqual(result[7].get('prefer_low_risk'), 'high')
+        self.assertEqual(result[7].get('risk_tolerance'), 'high')
 
     # test classify_response()
     def test_classify_response(self):
@@ -274,7 +273,7 @@ class TestChatbot(unittest.TestCase):
 
         # get the date of trading day
         user_prompt_dict = bot.identify_user_input(user_prompt='I have money to invest.')
-        prompt = bot.classify_response(
+        prompt, response_type = bot.classify_response(
             user_prompt_dict=user_prompt_dict,
             run_id_file_path=run_id_file_path,
             hyper_params_file_path=test_hyper_params_file,
@@ -283,19 +282,11 @@ class TestChatbot(unittest.TestCase):
 
         self.assertIsNotNone(prompt)
         self.assertEqual(str(type(prompt)), "<class 'str'>")
+        self.assertIsNotNone(response_type)
+        self.assertEqual(str(type(response_type)), "<class 'int'>")
 
-    # test generate_response()
+# test generate_response()
     def test_generate_response(self):
-        bot = chatbot.Chatbot()
-        response = bot.generate_response(
-            prompt='hi'
-        )
-        self.assertIsNotNone(response)
-        self.assertEqual(str(type(response)), "<class 'str'>")
-        self.assertGreater(len(response), 5)
-
-# test generate_prompt()
-    def test_generate_prompt(self):
         # create testing run_id
         trading_date='2026-08-31'
         test_run_id = 'unittest, unittest, unittest'
@@ -344,18 +335,9 @@ class TestChatbot(unittest.TestCase):
             gdict_file_path=test_gdict_file
         )
         
-        # type 1:
-        generated_prompt = bot.generate_prompt(
-            type=1, 
-            portfolio=None, 
-            portfolio_dict=None, 
-            trading_date=None,
-            gdict=None,
-        )
-        self.assertIsNone(generated_prompt)
-
-        generated_prompt = bot.generate_prompt(
-            type=1, 
+        # Response type 1:
+        generated_prompt = bot.generate_response(
+            response_type=1, 
             portfolio=portfolio, 
             portfolio_dict=portfolio_dict, 
             trading_date=trading_date,
@@ -366,18 +348,9 @@ class TestChatbot(unittest.TestCase):
         self.assertEqual(str(type(generated_prompt)), "<class 'str'>")
         self.assertGreater(len(generated_prompt), 10)
 
-        # type 2:
-        generated_prompt = bot.generate_prompt(
-            type=2, 
-            portfolio=None, 
-            portfolio_dict=None, 
-            trading_date=None,
-            gdict=gdict,
-        )
-        self.assertIsNone(generated_prompt)
-
-        generated_prompt = bot.generate_prompt(
-            type=2,
+        # response type 2:
+        generated_prompt = bot.generate_response(
+            response_type=2,
             portfolio=portfolio, 
             portfolio_dict=portfolio_dict, 
             trading_date=trading_date,
@@ -388,9 +361,21 @@ class TestChatbot(unittest.TestCase):
         self.assertEqual(str(type(generated_prompt)), "<class 'str'>")
         self.assertGreater(len(generated_prompt), 10)
 
-        # type 3:
-        generated_prompt = bot.generate_prompt(
-            type=None, 
+        # response type 3:
+        generated_prompt = bot.generate_response(
+            response_type=None, 
+            portfolio=None, 
+            portfolio_dict=None, 
+            trading_date='2025-01-31',
+            gdict=gdict,
+        )
+        self.assertIsNotNone(generated_prompt)
+        self.assertEqual(str(type(generated_prompt)), "<class 'str'>")
+        self.assertGreater(len(generated_prompt), 10)
+
+        # response type 4:
+        generated_prompt = bot.generate_response(
+            response_type=None, 
             portfolio=None, 
             portfolio_dict=None, 
             trading_date=None,

@@ -13,8 +13,8 @@ class TestValidation(unittest.TestCase):
 
         valid = validation.Validation(
             run_id=run_id,
-            val_fin_start='2021-01-01',
-            val_fin_end='2021-01-31',
+            val_fin_start='2023-01-01',
+            val_fin_end='2023-01-31',
             validation_hyper_parameter_filename = 'JSON/unittest_validation_hyper_parameter.json',
             )
 
@@ -43,8 +43,8 @@ class TestValidation(unittest.TestCase):
             point_mutate_rate=0.0, 
             point_mutate_amt=0.25,
 
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
 
             num_of_elite = num_of_elite,
             run_id=run_id,
@@ -64,8 +64,8 @@ class TestValidation(unittest.TestCase):
 
         valid = validation.Validation(
             run_id=run_id,
-            val_fin_start='2021-01-01',
-            val_fin_end='2021-01-31',
+            val_fin_start='2023-01-01',
+            val_fin_end='2023-01-31',
             validation_hyper_parameter_filename = 'JSON/unittest_validation_hyper_parameter.json',
             )
 
@@ -125,8 +125,8 @@ class TestValidation(unittest.TestCase):
             num_of_generations=num_of_generations,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
             run_id=run_id,
             gene_spec_filename = 'JSON/unittest_gene_spec.json',
             ga_performance_filename = 'JSON/unittest_ga_performance.json',
@@ -142,8 +142,8 @@ class TestValidation(unittest.TestCase):
         # start validation
         valid = validation.Validation(
             # period:
-            val_fin_start='2021-01-01',
-            val_fin_end='2021-01-31',
+            val_fin_start='2023-01-01',
+            val_fin_end='2023-01-31',
 
             # other parameters
             run_id=run_id,
@@ -190,8 +190,8 @@ class TestValidation(unittest.TestCase):
             num_of_generations=num_of_generations,
             point_mutate_rate=0.1, 
             point_mutate_amt=0.25,
-            fin_start='2020-12-01',
-            fin_end='2020-12-31',
+            fin_start='2023-12-01',
+            fin_end='2023-12-31',
             run_id=run_id,
             num_of_elite = num_of_elite,
     
@@ -213,8 +213,8 @@ class TestValidation(unittest.TestCase):
         # start validation
         valid = validation.Validation(
             run_id=run_id,
-            val_fin_start='2021-01-01',
-            val_fin_end='2021-01-31',
+            val_fin_start='2023-01-01',
+            val_fin_end='2023-01-31',
             validation_hyper_parameter_filename = validation_hyper_parameter_filename,
             )
 

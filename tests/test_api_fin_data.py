@@ -25,16 +25,16 @@ class TestAPIFinData(unittest.TestCase):
         get_fin_data=api_fin_data.APIFinData()
 
         # testing "get_symbol_from_csv()"
-        self.assertIsNotNone(get_fin_data.get_symbol_from_csv('2020-01-01'))
+        self.assertIsNotNone(get_fin_data.get_symbol_from_csv('2023-01-01'))
 
         # testing "get_financial_data()"
         ## make request to external API
         symbol='MSFT'
-        data_msft=get_fin_data.get_financial_data(symbol=symbol, period_end='2020-01-01')
+        data_msft=get_fin_data.get_financial_data(symbol=symbol, period_end='2023-01-01')
         self.assertIsNotNone(data_msft)
 
         symbol='ABC'
-        data=get_fin_data.get_financial_data(symbol=symbol, period_end='2020-01-01')
+        data=get_fin_data.get_financial_data(symbol=symbol, period_end='2023-01-01')
         self.assertIsNone(data)
 
         # testing "append_to_json()"
@@ -71,7 +71,7 @@ class TestAPIFinData(unittest.TestCase):
         # make request to external API
         # the symbol 'MSFT' was in the list of stock symbol
         symbol='MSFT'
-        api_data=get_fin_data.get_financial_data(symbol=symbol, period_end='2020-01-01')
+        api_data=get_fin_data.get_financial_data(symbol=symbol, period_end='2023-01-01')
         self.assertIsNotNone(api_data)
         # test if a pickle file was saved successfully, and test if the pickle can be read
         data=get_fin_data.read_from_pickle_binary_file('pickle/stock_data/' + symbol + '_max.pkl')
@@ -80,7 +80,7 @@ class TestAPIFinData(unittest.TestCase):
 
         # the symbol 'ABC' not in the list of stock symbol at the time of writing the code
         symbol='ABC'
-        api_data=get_fin_data.get_financial_data(symbol=symbol, period_end='2020-01-01')
+        api_data=get_fin_data.get_financial_data(symbol=symbol, period_end='2023-01-01')
         self.assertIsNone(api_data)
         # test if a pickle file was saved successfully, and test if the pickle can be read
         file_path='pickle/stock_data/' + symbol + '_max.pkl'
@@ -101,7 +101,7 @@ class TestAPIFinData(unittest.TestCase):
         get_fin_data=api_fin_data.APIFinData()
         # the beginning of financial period used in unittesting, and testing,
         ## and the beginning commonly used in training and validation
-        fin_start = ['2020-01-01', '2020-12-01', '2021-01-01', '2025-01-01', '2023-01-01', '2024-01-01', '2026-01-01']
+        fin_start = ['2023-01-01', '2023-12-01', '2024-01-01', '2024-07-01', '2025-01-01', '2026-01-01']
 
         # the 
         downloadable = []
@@ -149,7 +149,7 @@ class TestAPIFinData(unittest.TestCase):
     def test_get_symbol_from_csv(self):
         get_fin_data=api_fin_data.APIFinData()
 
-        trading_date = ['2020-01-01', '2026-06-29', '2026-06-30', '2026-07-01', '2026-08-01']
+        trading_date = ['2023-01-01', '2026-01-29', '2026-06-30', '2026-07-01', '2026-08-01']
 
         for td in trading_date:
 

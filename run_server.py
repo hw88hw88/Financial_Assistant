@@ -6,7 +6,6 @@ import datetime
 import re
 import threading
 import random
-import api_fin_data
 
 # import flask for the API server
 from flask import Flask, request, render_template
@@ -27,10 +26,8 @@ with bot_lock:
     bot.initialize_chatbot()
 
 # running this function to remove unnecessary elements in jobs{} and user_background{}
-# input:
-# 1. global variable: jobs{}
-# 2. global variable: user_background{}
-# output (or affected items):
+# input: (No input variable)
+# change (or affected items):
 # 1. global variable: jobs{}
 # 2. global variable: user_background{}
 def clear_job_and_background():
@@ -90,40 +87,55 @@ def chatbot_generate_response(
             # saving or updating user background
             if user_background.get(sender):
                 # investment
-                ## investment is true if the user expressed investment intent or mentioned risk appetite
-                if user_prompt_dict.get('investment') or user_prompt_dict.get('prefer_low_risk') is not None:
+                ## investment is true if the user expressed investment intent or mentioned risk tolerance
+                if user_prompt_dict.get('investment') or user_prompt_dict.get('risk_tolerance') is not None:
                     user_background[sender]['investment'] = True
                 # investment explanation
-                ## investment explanation is true if the same user expressed investment explanation intent
-                if user_prompt_dict.get('investment_explanation'):
+                ## investment explanation is mentioned in the latest prompt, apply the latest request
+                if user_prompt_dict.get('investment_explanation') is not None:
                     user_background[sender]['investment_explanation'] = user_prompt_dict.get('investment_explanation')
-                # prefer_low_risk
-                ## if user mentioned risk appetite, update the user background
-                if user_prompt_dict.get('prefer_low_risk') is not None:
-                    if user_prompt_dict.get('prefer_low_risk') != user_background.get(sender).get('prefer_low_risk'):
-                        user_background[sender]['prefer_low_risk'] = user_prompt_dict.get('prefer_low_risk')
+                # risk_tolerance
+                ## if user mentioned risk tolerance, update the user background
+                if user_prompt_dict.get('risk_tolerance') is not None:
+                    if user_prompt_dict.get('risk_tolerance') != user_background.get(sender).get('risk_tolerance'):
+                        user_background[sender]['risk_tolerance'] = user_prompt_dict.get('risk_tolerance')
                 # investment_date
                 ## if user mentioned investment date, update the user background
-                if user_prompt_dict.get('investment_date'):
+                if user_prompt_dict.get('investment_date') is not None:
                     user_background[sender]['investment_date'] = user_prompt_dict.get('investment_date')
-
+            
+            elif user_prompt_dict.get('risk_tolerance') is not None:
+                # created the user background for new users
+                user_background[sender] = user_prompt_dict
+                # investment
+                ## investment is true if the user expressed investment intent or mentioned risk tolerance
+                user_background[sender]['investment'] = True
             else:
                 # created the user background for new users
                 user_background[sender] = user_prompt_dict
 
         # classifying the prompt into categories
         with user_background_lock, bot_lock:
-            prompt = bot.classify_response(
+            prompt, response_type = bot.classify_response(
                 user_prompt_dict=user_background[sender],
-                run_id_file_path = 'CSV/run_id.csv'
             )
 
-        with bot_lock:
-            chatbot_response = bot.generate_response(
-                prompt=prompt
-            )
-
-        chatbot_response = re.sub(r".*Assistant:", "", chatbot_response, flags=re.MULTILINE)
+        # if response_type == 1:
+        #     with bot_lock:
+        #         chatbot_response = bot.generate_response(
+        #             prompt=prompt
+        #         )
+        #     chatbot_response = re.sub(r".*Assistant:", "", chatbot_response, flags=re.MULTILINE)
+        #     # avoid the system prompt being included in the response
+        #     if '```html' in chatbot_response:
+        #         chatbot_response = re.sub(r".*```html", "", chatbot_response, flags=re.MULTILINE)
+        #     if '<body>' in chatbot_response:
+        #         chatbot_response = re.sub(r"<body.?>", "", chatbot_response, flags=re.MULTILINE)
+        #     if '</body>' in chatbot_response:
+        #         chatbot_response = re.sub(r"<\/body.?>", "", chatbot_response, flags=re.MULTILINE)
+        # else:
+            # for repsonse type 2, 3 and 4, the prompt was the chatbot response
+        chatbot_response = prompt
 
         with jobs_lock:
             creation_time = jobs.get(str(job_id)).get('creation_time')
@@ -140,11 +152,13 @@ def chatbot_generate_response(
 
 # the endpoint for the website
 # input: (for POST method only)
-# 1. sender: sender ID
-# 2. message: user prompt
+# 1. POST request with sender: sender ID
+# 2. POST request with message: user prompt
 # output:
 # 1. HTML web page (for GET method)
 # 2. JSON object to tell users to wait or raise the error message
+# change:
+# 1. call the chatbot to process the prompt
 @app.route('/', methods=['GET', 'POST'])
 def chatbot_new_job_api():
     try:
@@ -191,8 +205,8 @@ def chatbot_new_job_api():
         threading.Thread(
             target=chatbot_generate_response, 
             args=(
-                sender,
-                message,
+                str(sender),
+                str(message),
                 str(job_id),
                 )
             ).start()
@@ -260,12 +274,12 @@ def chatbot_get_status():
                     'job_id': str(job_id),
                     'status': this_job.get('status')
                 }, 200
-        return {
-            'sender': this_job.get('sender'),
-            'text': pending_response_generator(),
-            'job_id': str(job_id),
-            'status': this_job.get('status')
-        }
+            return {
+                'sender': this_job.get('sender'),
+                'text': pending_response_generator(),
+                'job_id': str(job_id),
+                'status': this_job.get('status')
+            }
     except Exception as e:
         print('Error(chatbot_get_status()): ', e)
         return {

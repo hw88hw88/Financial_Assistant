@@ -1,8 +1,7 @@
 /* 
     The code was adapted from the CSS code of the website <howa.space> that was written and owned by the same author.
 
-    © 2026 developer of https://howa.space SRN 200212427
-    Color reference: https://coolors.co/ 
+    © 2026 developer of https://howa.space , SRN 200212427
  */
 * 
 {
@@ -13,6 +12,7 @@
 }
 
 /* variables for the colour palette */
+/* Colors scheme reference for the colour palette: https://coolors.co/  */
 :root
 {
     --colour: black;
@@ -25,43 +25,7 @@
     --colour8: #a7c957;
 
 }
-
-/* show finger over the 3As buttons */
-#smallA,
-#mediumA,
-#largeA 
-{
-    cursor: pointer;
-}
-
-/* Scroll bar */
-/* Reference: https://www.w3schools.com/howto/howto_js_scroll_indicator.asp */
-#scrollBar 
-{
-    border-top: 2px solid var(--colour7);
-    border-bottom: 2px solid var(--colour3);
-    height: 4px;
-    width: 0%;
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 2;
-}
-
-/* Set the 3 sets of font sizes for users to select from them */
-.smallFont
-{
-    font-size: 0.9em;
-}
-.mediumFont 
-{
-    font-size: 1rem;
-}
-.largeFont 
-{
-    font-size: 1.2rem;
-}
-
+/* for the whole web page */
 body
 {
     padding: 0; 
@@ -70,59 +34,6 @@ body
     min-width: 0;
     max-width: 100%;
 } 
-a,a:visited 
-{ 
-    text-decoration: none; 
-    color: inherit;
-}
-nav a:hover, footer > div > a:hover, #menu_button:hover, #clear:hover, #enter:hover, .button:hover
-{
-    color: var(--colour2);
-    background-color: var(--colour5);
-}
-footer > div > a:hover
-{
-    border: 2px solid var(--colour6);
-    border-radius: 3rem;
-    padding: 0.25rem 0.5rem;
-}
-footer > div > a 
-{
-    border: 2px solid var(--colour6);
-    border-radius: 3rem;
-    padding: 0.25rem 0.5rem;
-    margin: 0rem 0.5rem;
-}
-main
-{
-    padding: 1rem 1rem 1rem 1rem;
-    grid-area: main;
-    position: relative;
-    padding: 0.5rem 1rem;
-    align-items: center;
-    max-width: 100%;
-    min-width: 0%;
-}
-main a:hover
-{
-    color: var(--colour7);
-}
-header 
-{
-    grid-area: header;
-}
-footer 
-{
-    text-align: center; 
-    color: black; 
-    background-color: var(--colour8); 
-    padding: 0.3rem 0rem;
-    padding-top: 0.8rem;
-    bottom: 0px; 
-    width: 100%;
-    grid-area: footer;
-    position: fixed;
-}
 #grid-container
 {
     display: grid;
@@ -133,10 +44,18 @@ footer
     padding: 0;
     margin: 0;
 }
-footer div 
-{
-    margin-bottom: 1rem;
+a,a:visited 
+{ 
+    text-decoration: none; 
+    color: inherit;
 }
+nav a:hover, footer > div > a:hover, #menu_button:hover, #clear:hover, #enter:hover, .button:hover
+{
+    color: var(--colour2);
+    background-color: var(--colour5);
+}
+
+/* netvigator bar */
 nav
 {
     position: -webkit-sticky;
@@ -162,9 +81,38 @@ nav div div
 {
     float: right;
 }
+/* main */
+main
+{
+    padding: 1rem 1rem 1rem 1rem;
+    grid-area: main;
+    position: relative;
+    padding: 0.5rem 1rem;
+    align-items: center;
+    max-width: 100%;
+    min-width: 0%;
+}
+main a:hover
+{
+    color: var(--colour7);
+}
+header 
+{
+    grid-area: header;
+}
+
 main img
 {
     border: 1px solid var(--colour7);
+}
+
+/* chatbot */
+#query
+{
+    resize: vertical;
+    width: 100%;
+    max-width: 100%;
+    height: fit-content;
 }
 textarea 
 {
@@ -175,19 +123,6 @@ textarea
     border-style: solid;
     border-radius: 1rem;
     background-color: var(--colour2);
-}
-.red
-{
-    color: var(--colour3);
-}
-/* AI chatbot */
-/* User input */
-#query
-{
-    resize: vertical;
-    width: 100%;
-    max-width: 100%;
-    height: fit-content;
 }
 #response > div
 {
@@ -231,13 +166,159 @@ textarea
     padding: 0.5rem 2rem 0.5rem 2rem;
     font-weight: bold;
 }
-
+/* mobile view */
 #menu_button
 {
     display: none;
     cursor: pointer;
     clear: both;
 }
+/* footer */
+footer > div > a:hover
+{
+    border: 2px solid var(--colour6);
+    border-radius: 3rem;
+    padding: 0.25rem 0.5rem;
+}
+footer > div > a 
+{
+    border: 2px solid var(--colour6);
+    border-radius: 3rem;
+    padding: 0.25rem 0.5rem;
+    margin: 0rem 0.5rem;
+}
+footer div 
+{
+    margin-bottom: 1rem;
+}
+footer 
+{
+    text-align: center; 
+    color: black; 
+    background-color: var(--colour8); 
+    padding: 0.3rem 0rem;
+    padding-top: 0.8rem;
+    bottom: 0px; 
+    width: 100%;
+    grid-area: footer;
+    position: fixed;
+}
+/* Effect and animations */
+
+/* 
+        #smallA,
+        #mediumA,
+        #largeA {
+        cursor: pointer;
+        }
+
+
+        #scrollBar {
+        border-top: 1px solid red;
+        border-bottom: 1px solid var(--colour);
+        height: 2px;
+        width: 0%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        } 
+
+    Title: CM1040 Web Development, Coursework 2
+    Author: The author of this project (Anonoymous submission of assignment)
+    Date: March 2022
+    Code version: N/A
+    Availability: Submitted Assignment (Not published)
+*/
+
+/* show finger over the 3As buttons */
+#smallA,
+#mediumA,
+#largeA 
+{
+    cursor: pointer;
+}
+
+/* Scroll bar */
+/* Reference: https://www.w3schools.com/howto/howto_js_scroll_indicator.asp */
+#scrollBar 
+{
+    border-top: 2px solid var(--colour7);
+    border-bottom: 2px solid var(--colour3);
+    height: 4px;
+    width: 0%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 2;
+}
+/*
+        .smallFont
+        {
+            font-size: 1em;
+        }
+        .mediumFont 
+        {
+            font-size: 1.5em;
+        }
+        .largeFont 
+        {
+            font-size: 2em;
+        }
+    Title: 7.3.5 What can we do with these elements when we have them, the lecture video of week 14 of CM1040 Web Development
+    Author: The writer of the CM1040 module
+    Date: 23 January 2022
+    Code version: N/A
+    Availability: the Coursera learning platform (https://www.coursera.org/learn/uol-web-development/lecture/SJumr/7-3-5-what-can-we-do-with-these-elements-when-we-have-them)
+
+    The code was adapted from the above quoted code.
+*/
+/* Set the 3 sets of font sizes for users to select from them */
+.smallFont
+{
+    font-size: 0.8rem;
+}
+.mediumFont 
+{
+    font-size: 1rem;
+}
+.largeFont 
+{
+    font-size: 1.3rem;
+}
+
+
+/*
+        #backToTop {
+            position: fixed;
+            bottom: 5px;
+            right: 15px;
+            max-width: 30px;
+            max-height: 30px;
+            animation-name: button;
+            animation-duration: 2s;
+            border-radius: 5px;
+            border: 2px solid var(--colour5);
+            padding: 4px 2px;
+            background-color: var(--colour2);
+        }
+        @keyframes button {
+            0% {
+            right: 15px;
+            bottom: -50px;
+            }
+            100% {
+            right: 15px;
+            bottom: 5px;
+            }
+        }
+
+    Title: CM1040 Web Development, Coursework 2
+    Author: The author of this project (Anonoymous submission of assignment)
+    Date: March 2022
+    Code version: N/A
+    Availability: Submitted Assignment (Not published)
+
+*/
 
 /* bottom to top button */
 #bottom_to_top

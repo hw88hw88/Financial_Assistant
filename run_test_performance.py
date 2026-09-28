@@ -1,3 +1,5 @@
+# run the testing or validation
+
 try:
     import validation
     import os
@@ -8,7 +10,7 @@ try:
 
     ## the number of run_id in the CSV file
     ### 0 means the first run_id, 1 means the second
-    num_of_run = 7
+    num_of_run = 4
 
     ## the testing period
     testing_fin_start = '2025-01-01'
@@ -41,7 +43,7 @@ try:
         if not fm.check_file_exist(test_file_path):
             os.mkdir(test_file_path)
 
-        # run testing
+        # run testing or validation
         # validation
         valid = validation.Validation(
                 val_fin_start = testing_fin_start,
@@ -65,7 +67,7 @@ try:
                 is_testing=True
         )
 
-        # run validation for the fittest strategy in each generation
+        # run validation/ testing for the fittest strategy in each generation
         for gen in range(num_of_generations):
             # run for each elite in the generation
             for num_e in range(num_of_elite):

@@ -61,6 +61,7 @@ Yee-King, M., (no date) CM3020 Artificial Intelligence, Week 10 Mid-term coursew
         Python 3.12.3
 
 '''
+# run the training of GA and validation
 try:
         import ga
         import validation
@@ -190,7 +191,7 @@ try:
         # run the genetic algorithm
         g.run_ga()
 
-        # validation
+        # run validation
         valid = validation.Validation(
                 val_fin_start = val_fin_start,
                 val_fin_end = val_fin_end,

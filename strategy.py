@@ -47,8 +47,12 @@ class Strategy:
         self.stocks={}
         # the structure of <self.stock_cumulative_return{}>:
         # self.stock_cumulative_return{symbol: return}
-        ## For example, self.stock_cumulative_return{'MSFT': 0.1}
+        ## For example, self.stock_cumulative_return{'MSFT': 10,000}
         self.stock_cumulative_return={}
+        # the structure of <self.stock_roi}>:
+        # self.stock_roi{symbol: return}
+        ## For example, self.stock_roi{'MSFT': 0.1}
+        self.stock_roi={}
         self.max_drawdown=0
         self.num_of_increase_in_value=0
         self.age=0
@@ -75,7 +79,12 @@ class Strategy:
     # output:
     # 1. current price of the share
     # 2. the market volume on the current trading day
-    def get_market_info(self, current_trading_date, stock_df, symbol):
+    def get_market_info(
+            self, 
+            current_trading_date, 
+            stock_df, 
+            symbol
+        ):
         ## get the current information of the stock on the market
         ### get the data on the current date
         current_this_stock = stock_df.loc[stock_df.index == current_trading_date]
@@ -100,6 +109,7 @@ class Strategy:
     # 2. add to self.stocks{} the volume, date, cost of the newly bought shares
     # 3. add self.num_of_trade by 1
     # 4. add the symbol to self.stock_cumulative_return[symbol]
+    # 5. add the symbol to self.stock_roi[symbol]
     def buy_stock(
             self, 
             current_trading_date, 
@@ -133,13 +143,11 @@ class Strategy:
 
         # check if the volume is > 0 to avoid error from division by 0
         if target_volume <= 0:
-            print('target volume <= 0, symbol:', symbol, ', date=', current_trading_date)
-            print('stop buying')
+            print('target volume <= 0: ', target_volume,', symbol:', symbol, ', date=', current_trading_date)
             return
         elif target_value <= 0:
             # stop buying if target value is 0 or below 0
-            print('target value <= 0, symbol:', symbol, ', date=', current_trading_date)
-            print('stop buying')
+            print('target value <= 0: ', target_value, ', symbol:', symbol, ', date=', current_trading_date)
             return
 
         ## reduce cash
@@ -157,6 +165,8 @@ class Strategy:
         self.num_of_trade+=1
         ## add the cumulative return for each stock
         self.stock_cumulative_return[symbol]=0.0
+        ## add the roi for each stock
+        self.stock_roi[symbol]=0.0
 
     # a function to remove a stock from the portfolio
     # input:
@@ -200,6 +210,7 @@ class Strategy:
         if volume_to_sell == self.stocks[symbol]['volume']:
             self.stocks.pop(symbol)
             self.stock_cumulative_return.pop(symbol)
+            self.stock_roi.pop(symbol)
         else:
             # the cost of the stock will be deducted from the returns from the sales
             # but the cost must be at least 0, it cannot be negative
@@ -282,6 +293,7 @@ class Strategy:
     # 5. update self.total_value, which is the total value of the portfolio
     # 6. update self.num_of_increase_in_value, which is the number of times the value of the portfolio increase
     # 7. update self.max_drawdown, which is the highest
+    # 8. update self.stock_roi[symbol], if the stock is in the portfolio
     def daily_update(
             self, 
             stocks_df,
@@ -308,12 +320,14 @@ class Strategy:
                 cost = self.stocks[symbol]['cost']
                 volume = self.stocks[symbol]['volume']
 
+                # if the volume of a stock in portfolio <= 0, the stock is not in the portfolio
                 if volume <= 0:
                     print('Error: volume of ', symbol, ' <= 0')
 
                     # remove the stock
                     self.stocks.pop(symbol)
                     self.stock_cumulative_return.pop(symbol)
+                    self.stock_roi.pop(symbol)
 
                     # stop processing the stock, and go to the next stock
                     continue
@@ -354,6 +368,9 @@ class Strategy:
                 # update the stock_cumulative_return
                 self.stock_cumulative_return[symbol] = float((volume * current_price) - cost)
 
+                # update the stock ROI
+                self.stock_roi[symbol] = float(((volume * current_price) - cost) / cost)
+
                 # adding to portfolio value
                 new_portfolio_value += volume * current_price
 
@@ -390,7 +407,8 @@ class Strategy:
     # this function perform the rebalancing of portfolio. The rebalancing will reset the portfolio to the target stocks
     # input:
     # 1. current_target_portfolio[]: numpy array storing the symbol of the target selected stocks
-    # 2. stocks_df[]: the market data and the calculation of the financial indicators of each stock. The financial indicators were calculated based on the parameters in the strategy
+    # 2. stocks_df[]: the market data and the calculation of the financial indicators of each stock. 
+    #                 The financial indicators were calculated based on the parameters in the strategy
     # 3. current_trading_date: the current trading date in the format of pandas timestamp
     # 4. trading_fee: 
     # change:
@@ -469,7 +487,7 @@ class Strategy:
                                 trading_fee=trading_fee,
                             )
 
-    # this function calculates the total reward of the portfolio managed with the strategy
+    # fitness function: this function calculates the total reward of the portfolio managed with the strategy
     # change:
     # 1. self.rewards: update the total rewards of the portfolio managed with the strategy
     def fitness(self):
@@ -497,11 +515,11 @@ class Strategy:
         self.rewards = float(
             max(
                 0,
-                0.4 * reward_cum_return
-                + 0.5 * reward_win_rate
-                + 0.1 * reward_sharpe_ratio
+                0.25 * reward_cum_return
+                + 0.05 * reward_win_rate
+                + 0.7 * reward_sharpe_ratio
                 - 0.05 * penalty_num_of_trade
-                - 0.4 * penalty_max_drawdown
+                - 0.5 * penalty_max_drawdown
                 )
             )
 

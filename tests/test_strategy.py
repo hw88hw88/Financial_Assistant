@@ -14,6 +14,7 @@ class TestStrategy(unittest.TestCase):
         self.assertIsNotNone(s.rewards)
         self.assertIsNotNone(s.cumulative_return)
         self.assertIsNotNone(s.stock_cumulative_return)
+        self.assertIsNotNone(s.stock_roi)
         self.assertIsNotNone(s.stocks)
         # self.assertIsNotNone(s.annual_return)
         self.assertIsNotNone(s.max_drawdown)
@@ -41,7 +42,7 @@ class TestStrategy(unittest.TestCase):
 
     # test get_market_info() output
     def test_mkt_info(self):
-        sim=simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim=simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         st=strategy.Strategy(start_up_cash=100000)
         api= api_fin_data.APIFinData()
 
@@ -69,7 +70,7 @@ class TestStrategy(unittest.TestCase):
     # test the change of buy_stock() made
     def test_buy_stock(self):
         # initialize the test
-        sim=simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim=simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         start_up_cash=100000
         st=strategy.Strategy(start_up_cash=start_up_cash)
         api= api_fin_data.APIFinData()
@@ -125,10 +126,14 @@ class TestStrategy(unittest.TestCase):
         self.assertIsNotNone(st.stock_cumulative_return[symbol])
         self.assertEqual(st.stock_cumulative_return[symbol], 0)
 
+        # check stock_roi[symbol]
+        self.assertIsNotNone(st.stock_roi[symbol])
+        self.assertEqual(st.stock_roi[symbol], 0)
+
     # check sell_stock()
     def test_sell_stock(self):
         # initialize the test
-        sim=simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim=simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         start_up_cash=100000
         st=strategy.Strategy(start_up_cash=start_up_cash)
         api= api_fin_data.APIFinData()
@@ -170,6 +175,7 @@ class TestStrategy(unittest.TestCase):
         # the stock of AAPL was sold
         self.assertFalse(symbol in st.stocks)
         self.assertFalse(symbol in st.stock_cumulative_return)
+        self.assertFalse(symbol in st.stock_roi)
 
         # check cash balance
         ## the loss was due to the trading fee
@@ -181,7 +187,7 @@ class TestStrategy(unittest.TestCase):
     # check daily_update()
     def test_daily_update(self):
         # initialize the test
-        sim=simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim=simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         start_up_cash=100000
         st=strategy.Strategy(start_up_cash=start_up_cash)
         api= api_fin_data.APIFinData()
@@ -204,10 +210,12 @@ class TestStrategy(unittest.TestCase):
                   symbol=symbol,
                   trading_fee=trading_fee)
         
-        # check the cumulative returns
+        # check the cumulative returns and ROI
         self.assertIsNotNone(st.stocks[symbol])
         self.assertIsNotNone(st.stock_cumulative_return[symbol])
+        self.assertIsNotNone(st.stock_roi[symbol])
         self.assertEqual(st.cumulative_return, st.stock_cumulative_return[symbol])
+        self.assertEqual(float(st.stock_cumulative_return[symbol] / st.stocks[symbol]['cost']), st.stock_roi[symbol])
 
         st.daily_update(
                      stocks_df=stocks_df,
@@ -221,12 +229,14 @@ class TestStrategy(unittest.TestCase):
 
         self.assertIsNotNone(st.stocks[symbol])
         self.assertIsNotNone(st.stock_cumulative_return[symbol])
+        self.assertIsNotNone(st.stock_roi[symbol])
         self.assertAlmostEqual(st.cumulative_return, st.stock_cumulative_return[symbol])
+        self.assertEqual(float(st.stock_cumulative_return[symbol] / st.stocks[symbol]['cost']), st.stock_roi[symbol])
 
     # check rebalance()
     def test_rebalancing(self):
         # initialize the test
-        sim=simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim=simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         start_up_cash=100000
         st=strategy.Strategy(start_up_cash=start_up_cash)
         api= api_fin_data.APIFinData()
@@ -279,7 +289,7 @@ class TestStrategy(unittest.TestCase):
     # check fitness()
     def test_fitness(self):
         # initialize the test
-        sim=simulation.Simulation(fin_start='2020-01-01', fin_end='2020-01-31', trading_fee=0.01)
+        sim=simulation.Simulation(fin_start='2023-01-01', fin_end='2023-01-31', trading_fee=0.01)
         start_up_cash=100000
         st=strategy.Strategy(start_up_cash=start_up_cash)
         api= api_fin_data.APIFinData()

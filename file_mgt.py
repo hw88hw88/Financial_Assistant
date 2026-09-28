@@ -14,11 +14,11 @@ class FileMgt:
     # 1. directory: a string storing the file path
     # output:
     # 1. a list to store the file paths of all files in the directory, or
-    # 2. return None, if there is no file in the directory
+    # 2. return empty list [], if there is no file in the directory
     @staticmethod
     def list_files_in_directory(directory):
+        files = []
         if os.path.exists(directory):
-            files = []
             def list_files(directory):
                 for f in os.listdir(directory):
                     if os.path.isfile(os.path.join(directory, f)):
@@ -26,8 +26,7 @@ class FileMgt:
                     else:
                         list_files(os.path.join(directory, f))
             list_files(directory)
-            return files
-        return None
+        return files
 
     '''
     @staticmethod
@@ -50,11 +49,11 @@ class FileMgt:
     Yee-King, M., (no date) CM3020 Artificial Intelligence, Week 10 Mid-term coursework starter code [online] Available from: https://www.coursera.org/learn/uol-cm3020-artificial-intelligence/assignment-submission/6JASg/mid-term-coursework [8 December 2025]
     '''
     # write content, such as gene spec, to JSON file(s)
-    # input: 
-    ## 1. file path
-    ## 2. JSON content in a python dict
-    # output:
-    ## 1. JSON file
+    # input:
+    # 1. to_json_content: JSON content in a python dict
+    # 2. filename: file path
+    # output: (return nothing)
+    # 1. JSON file
     @staticmethod
     def write_to_json(to_json_content, filename):
         content = json.dumps(to_json_content)
@@ -92,7 +91,7 @@ class FileMgt:
     # input: 
     ## 1. list_content: a single dimension list
     ## 2. csv file path
-    # output:
+    # output: (return nothing)
     ## 1. write CSV file to disk
     @staticmethod
     def write_dna_to_csv(list_content, csv_file_path):
@@ -104,11 +103,11 @@ class FileMgt:
         with open(csv_file_path, 'w') as f:
             f.write(csv_str)
 
-    # read content, such as gdict, from JSON fil
+    # read content, such as gdict, from JSON file
     # input:
     # 1. filename: a string of file path of a JSON file
     # output:
-    # 1. return the content from the JSON file, such as a python dict{}
+    # 1. return the content from the JSON file in a python dict{}
     @staticmethod
     def read_json(filename):
         with open(filename) as f:
@@ -127,7 +126,7 @@ class FileMgt:
                 return True
         return False
 
-    # read CSV file for reading DNA or gene
+    # reading DNA or gene
     # input:
     # 1. CSV file path
     # output:
@@ -171,6 +170,8 @@ class FileMgt:
     # input:
     # 1. csv_file_path: file path
     # 2. to_csv_content: content to be written to CSV file
+    # output: (return nothing)
+    # write content to CSV file
     @staticmethod
     def write_csv(csv_file_path, to_csv_content):
         with open(csv_file_path, 'w') as f:
