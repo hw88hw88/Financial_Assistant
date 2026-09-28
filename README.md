@@ -14,42 +14,51 @@ Python 3.12.3\
 node v24.20.0\
 npm 12.0.2
 
-#### Hardware should be able to run gemma-4-E2B model.
-Please download and save it the LLM to \
-"LLM/gemma-4-E2B-it-qat-q4_0-gguf/gemma-4-E2B_q4_0-it.gguf"\
-from:\
-<https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf/resolve/main/gemma-4-E2B_q4_0-it.gguf?download=true>
+## Steps to run the project locally
+1.On the terminal type:\
+    git clone https://github.com/hw88hw88/Financial_Assistant.git       \
 
-#### Unit testing (Please always run unit testing to download new financial data before applying the investment strategy to live data)
-python3 -m unittest tests/test_*.py
+2.Run the following to build a new virtual environment for the project\
+    sudo apt install python3-pip python3-venv   \
+    mkdir envs                                  \
+    cd envs                                     \
+    python3 -m venv final_project               \
+    source final_project/bin/activate                         \
+    cd ..                                       \
 
-#### Training and validation
-python3 run_ga_find_fittest.py <no. of threads>
+3.Install dependencies by running:      \
+    cd Financial_Assistant/             \
+    pip3 install –U pip                 \
+    pip3 install –r requirements.txt    \
 
-#### Testing the performance on testing data
-python3 run_test_performance.py
+4.Download the LLM and back to the root of the project\
+Type and run the following:\
+    cd LLM/gemma-4-E2B-it-qat-q4_0-gguf         \
+    wget https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf/resolve/main/gemma-4-E2B_q4_0-it.gguf           \
+Rename the file to <gemma-4-E2B_q4_0-it.gguf>\
+    mv <the downloaded file name> gemma-4-E2B_q4_0-it.gguf \
+Back to the root of the project\
+    cd ../..    \
 
-#### You need to open 2 terminals (with trained data)
-##### Terminal 1:
-cd ga
+5.Unzip the files of trained strategies\
+Type and run the following:\
+    sudo apt install 7zip       \
+    cd CSV/                     \
+    7z x CSV.zip                \
+    cd ../JSON/                 \
+    7z x JSON.zip               \
+    cd ..                       \
 
-###### install dependency;
-pip install -r requirements.txt
+6.Run the unit tests\
+from the root of the project, type and run the following:\
+    python3 -m unittest tests/test_*.py         \
 
-###### run the test to download live data first
-python -m unittest tests/test_*.py
+7.Run the web server\
+    gunicorn run_server:app --workers 1 --bind 0.0.0.0:40083 --timeout 600          \
 
-###### run the API and LLM server
-flask --app run_server run
-
-#### Terminal 2:
-cd web_server_node\
-npm install\
-
-node index.js
-
-#### Last step:
-Browse <http://localhost:40082>
+8.Open your browser and go to:\
+    http://localhost:40083  \
+    
 
 ### The file structure of the GA
 
@@ -112,15 +121,46 @@ ga/\
 │       │        ## is the validation result of the fittest in the first generation\
 │       └────── validation_performance_gen<generation number>_elite<elite number>.json\
 │    # a folder storing financial data in pickle format\
+├── LLM/\
+│   │   # the LLM\
+│   └── gemma-4-E2B-it-qat-q4_0-gguf\
+│       └──────gemma-4-E2B_q4_0-it.gguf
 ├── pickle/\
 │    # a folder storing all unit test code\
+├── plotting_img/\
+│    # a folder storing all plotted images\
+├── static/\
+│   │   # the static assets for web pages\
+│   ├── img/\
+│   │   # the images for the web pages
+│   ├── script/\
+│   │   # the scripts for the web pages
+│   │   ├── live_query.js
+│   │   ├── m_view.js
+│   │   └── view_page.js
+│   └── style/\
+│       # the CSS files
+│       ├─ bootstrap.min.css
+│       ├─ bootstrap.min.css.map
+│       └─ myStyle.css
+├── templates/\
+│   │   # the HTML files for web pages\
+│   ├── about.html
+│   ├── index.html
+│   └── LICENSE.txt
+├── test/\
+│   │   # the unit tests for the javascript\
+│   └── test.js\
 ├── tests/\
 │   │   # the unit tests for the respective python files\
 │   ├── test_api_fin_data.py\
+│   ├── test_chatbot.py\
 │   ├── test_file_mgt.py\
 │   ├── test_ga.py\
 │   ├── test_genome.py\
+│   ├── test_plotting.py\
 │   ├── test_population.py\
+│   ├── test_run_server.py\
 │   ├── test_simulation.py\
 │   ├── test_strategy.py\
 │   └── test_validation.py\
@@ -129,16 +169,24 @@ ga/\
 │     # the code for information retrieval\
 ├── api_fin_data.py\
 │     # the code for file management\
+├── chatbot.py\
+│     # the code for chatbot\
 ├── file_mgt.py\
 │     # the code for genetic algorithm\
 ├── ga.py\
 │     # the code for genes and genome to generate investment strategies\
 ├── genome.py\
 │     # the code for building population, fitmap, and parents selection\
+├── package.json\
+│     # the file for running npm install
+├── plotting.py\
+│     # the code for plotting
 ├── population.py\
 │     # the code for running the training and validation of the GA\
 ├── run_ga_find_fittest.py\
 │     # the code to test the fittest strategies in each generation on testing data\
+├── run_server.py\
+│     # the code for the web server
 ├── run_test_performance.py\
 │     # the code to run the simulation of trading the stocks\
 ├── simulation.py\
