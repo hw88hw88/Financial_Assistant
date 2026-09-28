@@ -532,6 +532,7 @@ class GA:
                     print('id: ', id, ', run_id: ', run_id_record[id].strip())
             try:
                 # wait 60 seconds for the user to enter which strategy to import
+                print('You can type "Enter" to skip this step.')
                 user_input = inputimeout(prompt='Enter the <id> or <run_id> to import the previous strategy: (<id>, <run_id> or Nothing to import) \n(60 seconds) >>\n', timeout=60)
             except TimeoutOccurred:
                 print('Time is up. No strategy is imported')
