@@ -16,9 +16,11 @@ npm 12.0.2
 
 ## Steps to run the project locally
 1.On the terminal type:\
+
     git clone https://github.com/hw88hw88/Financial_Assistant.git       \
 
-2.Run the following to build a new virtual environment for the project\
+2.Run the following to build a new virtual environment for the project:\
+
     sudo apt install python3-pip python3-venv   \
     mkdir envs                                  \
     cd envs                                     \
@@ -27,21 +29,28 @@ npm 12.0.2
     cd ..                                       \
 
 3.Install dependencies by running:      \
+
     cd Financial_Assistant/             \
     pip3 install –U pip                 \
     pip3 install –r requirements.txt    \
 
-4.Download the LLM and back to the root of the project\
+4.Download the LLM and back to the root of the project:\
 Type and run the following:\
+
     cd LLM/gemma-4-E2B-it-qat-q4_0-gguf         \
     wget https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf/resolve/main/gemma-4-E2B_q4_0-it.gguf           \
-Rename the file to <gemma-4-E2B_q4_0-it.gguf>\
+
+Rename the file to <gemma-4-E2B_q4_0-it.gguf>:\
+
     mv <the downloaded file name> gemma-4-E2B_q4_0-it.gguf \
-Back to the root of the project\
+
+Back to the root of the project:\
+
     cd ../..    \
 
-5.Unzip the files of trained strategies\
+5.Unzip the files of trained strategies:\
 Type and run the following:\
+
     sudo apt install 7zip       \
     cd CSV/                     \
     7z x CSV.zip                \
@@ -49,14 +58,17 @@ Type and run the following:\
     7z x JSON.zip               \
     cd ..                       \
 
-6.Run the unit tests\
+6.Run the unit tests:\
 from the root of the project, type and run the following:\
+
     python3 -m unittest tests/test_*.py         \
 
-7.Run the web server\
+7.Run the web server:\
+
     gunicorn run_server:app --workers 1 --bind 0.0.0.0:40083 --timeout 600          \
 
 8.Open your browser and go to:\
+
     http://localhost:40083  \
     
 
@@ -124,7 +136,7 @@ ga/\
 ├── LLM/\
 │   │   # the LLM\
 │   └── gemma-4-E2B-it-qat-q4_0-gguf\
-│       └──────gemma-4-E2B_q4_0-it.gguf
+│       └──────gemma-4-E2B_q4_0-it.gguf\
 ├── pickle/\
 │    # a folder storing all unit test code\
 ├── plotting_img/\
@@ -132,22 +144,22 @@ ga/\
 ├── static/\
 │   │   # the static assets for web pages\
 │   ├── img/\
-│   │   # the images for the web pages
+│   │   # the images for the web pages\
 │   ├── script/\
-│   │   # the scripts for the web pages
-│   │   ├── live_query.js
-│   │   ├── m_view.js
-│   │   └── view_page.js
+│   │   # the scripts for the web pages\
+│   │   ├── live_query.js\
+│   │   ├── m_view.js\
+│   │   └── view_page.js\
 │   └── style/\
-│       # the CSS files
-│       ├─ bootstrap.min.css
-│       ├─ bootstrap.min.css.map
-│       └─ myStyle.css
+│       # the CSS files\
+│       ├─ bootstrap.min.css\
+│       ├─ bootstrap.min.css.map\
+│       └─ myStyle.css\
 ├── templates/\
 │   │   # the HTML files for web pages\
-│   ├── about.html
-│   ├── index.html
-│   └── LICENSE.txt
+│   ├── about.html\
+│   ├── index.html\
+│   └── LICENSE.txt\
 ├── test/\
 │   │   # the unit tests for the javascript\
 │   └── test.js\
@@ -178,15 +190,15 @@ ga/\
 ├── genome.py\
 │     # the code for building population, fitmap, and parents selection\
 ├── package.json\
-│     # the file for running npm install
+│     # the file for running npm install\
 ├── plotting.py\
-│     # the code for plotting
+│     # the code for plotting\
 ├── population.py\
 │     # the code for running the training and validation of the GA\
 ├── run_ga_find_fittest.py\
 │     # the code to test the fittest strategies in each generation on testing data\
 ├── run_server.py\
-│     # the code for the web server
+│     # the code for the web server\
 ├── run_test_performance.py\
 │     # the code to run the simulation of trading the stocks\
 ├── simulation.py\
