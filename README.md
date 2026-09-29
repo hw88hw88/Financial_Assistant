@@ -15,61 +15,61 @@ node v24.20.0\
 npm 12.0.2
 
 ## Steps to run the project locally
-1.On the terminal type:\
+1.On the terminal type:
 
-    git clone https://github.com/hw88hw88/Financial_Assistant.git       \
+    git clone https://github.com/hw88hw88/Financial_Assistant.git       
 
-2.Run the following to build a new virtual environment for the project:\
+2.Run the following to build a new virtual environment for the project:
 
-    sudo apt install python3-pip python3-venv   \
-    mkdir envs                                  \
-    cd envs                                     \
-    python3 -m venv final_project               \
-    source final_project/bin/activate                         \
-    cd ..                                       \
+    sudo apt install python3-pip python3-venv   
+    mkdir envs                                  
+    cd envs                                     
+    python3 -m venv final_project               
+    source final_project/bin/activate                         
+    cd ..                                       
 
-3.Install dependencies by running:      \
+3.Install dependencies by running:      
 
-    cd Financial_Assistant/             \
-    pip3 install –U pip                 \
-    pip3 install –r requirements.txt    \
+    cd Financial_Assistant/             
+    pip3 install –U pip                 
+    pip3 install –r requirements.txt    
 
-4.Download the LLM and back to the root of the project:\
-Type and run the following:\
+4.Download the LLM and back to the root of the project:
+Type and run the following:
 
-    cd LLM/gemma-4-E2B-it-qat-q4_0-gguf         \
-    wget https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf/resolve/main/gemma-4-E2B_q4_0-it.gguf           \
+    cd LLM/gemma-4-E2B-it-qat-q4_0-gguf         
+    wget https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf/resolve/main/gemma-4-E2B_q4_0-it.gguf           
 
-Rename the file to <gemma-4-E2B_q4_0-it.gguf>:\
+Rename the file to <gemma-4-E2B_q4_0-it.gguf>:
 
-    mv <the downloaded file name> gemma-4-E2B_q4_0-it.gguf \
+    mv <the downloaded file name> gemma-4-E2B_q4_0-it.gguf 
 
-Back to the root of the project:\
+Back to the root of the project:
 
-    cd ../..    \
+    cd ../..    
 
-5.Unzip the files of trained strategies:\
-Type and run the following:\
+5.Unzip the files of trained strategies:
+Type and run the following:
 
-    sudo apt install 7zip       \
-    cd CSV/                     \
-    7z x CSV.zip                \
-    cd ../JSON/                 \
-    7z x JSON.zip               \
-    cd ..                       \
+    sudo apt install 7zip       
+    cd CSV/                     
+    7z x CSV.zip                
+    cd ../JSON/                 
+    7z x JSON.zip               
+    cd ..                       
 
 6.Run the unit tests:\
-from the root of the project, type and run the following:\
+from the root of the project, type and run the following:
 
-    python3 -m unittest tests/test_*.py         \
+    python3 -m unittest tests/test_*.py         
 
-7.Run the web server:\
+7.Run the web server:
 
-    gunicorn run_server:app --workers 1 --bind 0.0.0.0:40083 --timeout 600          \
+    gunicorn run_server:app --workers 1 --bind 0.0.0.0:40083 --timeout 600          
 
-8.Open your browser and go to:\
+8.Open your browser and go to:
 
-    http://localhost:40083  \
+    http://localhost:40083  
     
 
 ### The file structure of the GA
